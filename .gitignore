@@ -39,11 +39,8 @@ session_summary.md
 SESSION_SUMMARY.md
 AI_ROADMAP.md
 
-# Local-only backend and developer records
-backend/
+# Local records
 CHANGELOG.md
-BACKEND.md
-docker-compose.yml
 
 
 

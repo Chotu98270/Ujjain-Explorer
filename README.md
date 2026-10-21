@@ -4,11 +4,18 @@ A modern, high-performance tour guide and pilgrimage web application for **Ujjai
 
 ---
 
+### **[Backend Architecture & API Specs](./BACKEND.md)**
+
+---
+
 [![Version](https://img.shields.io/badge/version-1.0.0-orange.svg?style=flat-square)](#)
 [![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-%230db7ed.svg?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-FF6F00?style=flat-square&logo=progressive-web-apps&logoColor=white)](#)
 
 ---
@@ -144,17 +151,29 @@ npm run dev
 
 ```
 Ujjain-Explorer/
+├── backend/
+│   ├── prisma/             # Prisma schema and migrations
+│   ├── src/
+│   │   ├── config/         # JWT and application configuration
+│   │   ├── controllers/    # Place, Itinerary, User, Weather, and Event controllers
+│   │   ├── middleware/     # Auth and rate limiting middleware
+│   │   ├── routes/         # Express API route declarations
+│   │   ├── services/       # Cache (Redis) & Overpass (OSM) services
+│   │   ├── app.ts          # Express server entry point
+│   │   └── seed.ts         # Database seed script for Ujjain
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
 ├── src/
-│   ├── components/         # Reusable UI components (BottomNav, PlaceCard, Status)
-│   ├── data/               # Design tokens, Ujjain datasets, API client, translations
+│   ├── components/         # Reusable UI components (Navbar, Cards, Status)
+│   ├── data/               # Design tokens, Ujjain datasets, API clients, translations
 │   ├── hooks/              # Custom React hooks (geolocation)
 │   ├── screens/            # Home, Explore, Map, Plan, Profile, Auth screens
 │   ├── utils/              # Distance and geolocation helper utilities
 │   ├── App.jsx             # Main React application router
 │   └── main.jsx            # React root mount
 ├── public/                 # Static assets, icons, and PWA manifest
-├── index.html              # HTML5 entry template
-├── tailwind.config.js      # Styling configuration
+├── docker-compose.yml      # Multi-container Postgres + PostGIS + Redis setup
 ├── package.json
 └── vite.config.js
 ```
