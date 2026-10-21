@@ -1,0 +1,24 @@
+{
+  "short_name": "Ujjain Explorer",
+  "name": "Ujjain Explorer - Avantika Darshan & Tour Guide",
+  "description": "Explore the sacred Jyotirlinga, Shipra ghats, ancient heritage, and Malwi food of Ujjain (Avantika) with smart itineraries and offline maps.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF6EE",
+  "theme_color": "#D9531E",
+  "display": "standalone",
+  "orientation": "portrait"
+}
