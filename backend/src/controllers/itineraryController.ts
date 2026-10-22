@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { AuthRequest } from '../middleware/auth';
+import { isGoogleMapsEnabled, optimizeWaypointsWithGoogle } from '../services/googleMapsService';
 
 const prisma = new PrismaClient();
 
@@ -269,42 +270,53 @@ export const optimizeItinerary = async (req: AuthRequest, res: Response) => {
       return res.json(stops);
     }
 
-    // 4. Query OSRM Trip API
+    // 4. Optimize Waypoint Sequence (Google Routes API with OSRM fallback)
     const profile = mode === 'Walking' ? 'foot' : 'driving';
-    const coordsStr = stopsWithCoords.map(s => `${s.lng},${s.lat}`).join(';');
-    
-    // OSRM Trip API starting at the first coordinate
-    const url = `https://router.project-osrm.org/trip/v1/${profile}/${coordsStr}?source=first&destination=any&roundtrip=false`;
-    
-    const response = await axios.get(url);
-    const data = response.data;
+    let sortedIndices: number[] = [];
 
-    if (data.code === 'Ok' && data.waypoints) {
-      // Sort waypoints by trips_index to get optimized sequence
-      const sortedWaypoints = [...data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
-      
-      // Update stop orders
-      for (let i = 0; i < sortedWaypoints.length; i++) {
-        const wp = sortedWaypoints[i];
-        const stopItem = stopsWithCoords[wp.waypoint_index];
-        
+    if (isGoogleMapsEnabled()) {
+      const googleCoords = stopsWithCoords.map(s => ({ lat: s.lat!, lon: s.lng! }));
+      const travelMode = mode === 'Walking' ? 'WALK' : 'DRIVE';
+      const result = await optimizeWaypointsWithGoogle(googleCoords, travelMode);
+      if (result && result.order.length === stopsWithCoords.length) {
+        sortedIndices = result.order;
+      }
+    }
+
+    // Fallback to OSRM Trip API if Google is not enabled or failed
+    if (sortedIndices.length === 0) {
+      try {
+        const coordsStr = stopsWithCoords.map(s => `${s.lng},${s.lat}`).join(';');
+        const url = `https://router.project-osrm.org/trip/v1/${profile}/${coordsStr}?source=first&destination=any&roundtrip=false`;
+        const response = await axios.get(url, { timeout: 4500 });
+        const data = response.data;
+        if (data.code === 'Ok' && data.waypoints) {
+          const sortedWaypoints = [...data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
+          sortedIndices = sortedWaypoints.map((wp: any) => wp.waypoint_index);
+        }
+      } catch (osrmError: any) {
+        console.warn('[OSRM] Fallback optimization failed:', osrmError.message);
+      }
+    }
+
+    // Update stop orders
+    if (sortedIndices.length > 0) {
+      for (let i = 0; i < sortedIndices.length; i++) {
+        const stopItem = stopsWithCoords[sortedIndices[i]];
         await prisma.itineraryStop.update({
           where: { id: stopItem.stop.id },
           data: { order: i }
         });
       }
-      
-      // Fetch optimized stops sorted by new order
-      const optimizedStops = await prisma.itineraryStop.findMany({
-        where: { itineraryDayId: Number(itineraryDayId) },
-        orderBy: { order: 'asc' }
-      });
-      
-      return res.json(optimizedStops);
-    } else {
-      console.warn('[OSRM] Optimization failed. Code:', data.code);
-      return res.status(400).json({ error: 'Trip optimization failed' });
     }
+
+    // Fetch optimized stops sorted by new order
+    const optimizedStops = await prisma.itineraryStop.findMany({
+      where: { itineraryDayId: Number(itineraryDayId) },
+      orderBy: { order: 'asc' }
+    });
+    
+    return res.json(optimizedStops);
   } catch (error) {
     console.error('Optimization error:', error);
     res.status(500).json({ error: 'Failed to optimize itinerary' });
@@ -482,21 +494,40 @@ Do not include any conversational markdown tags or prefix/suffix. Just return th
         }
       }
 
-      // If we have stops, optimize order using OSRM Trip API (or simple distance sorting fallback)
+      // If we have stops, optimize order using Google Routes API (or OSRM Trip API fallback)
       if (dayStopsData.length > 0) {
         let sortedStopsData = [...dayStopsData];
 
         if (dayStopsData.length >= 2) {
-          try {
-            const coordsStr = dayStopsData.map(s => `${s.place.longitude},${s.place.latitude}`).join(';');
-            const url = `https://router.project-osrm.org/trip/v1/driving/${coordsStr}?source=first&destination=any&roundtrip=false`;
-            const response = await axios.get(url);
-            if (response.data?.code === 'Ok' && response.data?.waypoints) {
-              const sortedWaypoints = [...response.data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
-              sortedStopsData = sortedWaypoints.map((wp: any) => dayStopsData[wp.waypoint_index]);
+          let optimizedIndices: number[] = [];
+
+          if (isGoogleMapsEnabled()) {
+            const googleCoords = dayStopsData.map(s => ({
+              lat: Number(s.place.latitude),
+              lon: Number(s.place.longitude)
+            }));
+            const res = await optimizeWaypointsWithGoogle(googleCoords, 'DRIVE');
+            if (res && res.order.length === dayStopsData.length) {
+              optimizedIndices = res.order;
             }
-          } catch (osrmError) {
-            console.error("OSRM Trip Optimization failed for generated day:", osrmError);
+          }
+
+          if (optimizedIndices.length === 0) {
+            try {
+              const coordsStr = dayStopsData.map(s => `${s.place.longitude},${s.place.latitude}`).join(';');
+              const url = `https://router.project-osrm.org/trip/v1/driving/${coordsStr}?source=first&destination=any&roundtrip=false`;
+              const response = await axios.get(url, { timeout: 4500 });
+              if (response.data?.code === 'Ok' && response.data?.waypoints) {
+                const sortedWaypoints = [...response.data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
+                optimizedIndices = sortedWaypoints.map((wp: any) => wp.waypoint_index);
+              }
+            } catch (osrmError) {
+              console.error("OSRM Trip Optimization failed for generated day:", osrmError);
+            }
+          }
+
+          if (optimizedIndices.length > 0) {
+            sortedStopsData = optimizedIndices.map(idx => dayStopsData[idx]);
           }
         }
 
@@ -692,23 +723,38 @@ export const adaptWeather = async (req: AuthRequest, res: Response) => {
       }).filter(s => s.lat !== null && s.lng !== null && s.lat !== undefined && s.lng !== undefined);
 
       if (stopsWithCoords.length >= 2) {
-        try {
-          const coordsStr = stopsWithCoords.map(s => `${s.lng},${s.lat}`).join(';');
-          const url = `https://router.project-osrm.org/trip/v1/driving/${coordsStr}?source=first&destination=any&roundtrip=false`;
-          const response = await axios.get(url);
-          if (response.data?.code === 'Ok' && response.data?.waypoints) {
-            const sortedWaypoints = [...response.data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
-            for (let i = 0; i < sortedWaypoints.length; i++) {
-              const wp = sortedWaypoints[i];
-              const stopItem = stopsWithCoords[wp.waypoint_index];
-              await prisma.itineraryStop.update({
-                where: { id: stopItem.stop.id },
-                data: { order: i }
-              });
-            }
+        let sortedIndices: number[] = [];
+
+        if (isGoogleMapsEnabled()) {
+          const googleCoords = stopsWithCoords.map(s => ({ lat: s.lat!, lon: s.lng! }));
+          const res = await optimizeWaypointsWithGoogle(googleCoords, 'DRIVE');
+          if (res && res.order.length === stopsWithCoords.length) {
+            sortedIndices = res.order;
           }
-        } catch (osrmError) {
-          console.error("OSRM Trip Optimization failed during weather adaptation:", osrmError);
+        }
+
+        if (sortedIndices.length === 0) {
+          try {
+            const coordsStr = stopsWithCoords.map(s => `${s.lng},${s.lat}`).join(';');
+            const url = `https://router.project-osrm.org/trip/v1/driving/${coordsStr}?source=first&destination=any&roundtrip=false`;
+            const response = await axios.get(url, { timeout: 4500 });
+            if (response.data?.code === 'Ok' && response.data?.waypoints) {
+              const sortedWaypoints = [...response.data.waypoints].sort((a: any, b: any) => a.trips_index - b.trips_index);
+              sortedIndices = sortedWaypoints.map((wp: any) => wp.waypoint_index);
+            }
+          } catch (osrmError) {
+            console.error("OSRM Trip Optimization failed during weather adaptation:", osrmError);
+          }
+        }
+
+        if (sortedIndices.length > 0) {
+          for (let i = 0; i < sortedIndices.length; i++) {
+            const stopItem = stopsWithCoords[sortedIndices[i]];
+            await prisma.itineraryStop.update({
+              where: { id: stopItem.stop.id },
+              data: { order: i }
+            });
+          }
         }
       }
     }

@@ -4,6 +4,12 @@ import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/jwt';
 import { searchOSMPlaces, fetchOSMPlacesByCategory, fetchOSMPlacesInBounds } from '../services/overpassService';
+import { 
+  isGoogleMapsEnabled, 
+  searchGooglePlaces, 
+  fetchGooglePlacesByCategory as fetchGooglePlacesCat, 
+  fetchGooglePlacesInBounds as fetchGooglePlacesBounds 
+} from '../services/googleMapsService';
 import { getCachedData, setCachedData, invalidateCache } from '../services/cacheService';
 
 const prisma = new PrismaClient();
@@ -30,18 +36,22 @@ const saveDiscoveredPlaces = async (discoveredPlaces: any[]): Promise<any[]> => 
     // 1. Upsert basic data
     const upserted = await prisma.place.upsert({
       where: { osmId: p.osmId },
-      update: { latitude, longitude }, 
+      update: { latitude, longitude, ...rest }, 
       create: { ...rest, latitude, longitude }
     });
     saved.push(upserted);
 
-    // 2. Populate PostGIS geometry column using raw SQL
+    // 2. Populate PostGIS geometry column using raw SQL (safe against DB missing PostGIS extension)
     if (latitude && longitude) {
-      await prisma.$executeRaw`
-        UPDATE "Place" 
-        SET "location" = ST_SetSRID(ST_MakePoint(${Number(longitude)}, ${Number(latitude)}), 4326)
-        WHERE id = ${upserted.id}
-      `;
+      try {
+        await prisma.$executeRaw`
+          UPDATE "Place" 
+          SET "location" = ST_SetSRID(ST_MakePoint(${Number(longitude)}, ${Number(latitude)}), 4326)
+          WHERE id = ${upserted.id}
+        `;
+      } catch (geomErr) {
+        // Silently continue if PostGIS is not enabled on local Postgres
+      }
     }
   }
   
@@ -94,14 +104,24 @@ export const getAllPlaces = async (req: Request, res: Response) => {
           orderBy: { rating: 'desc' }
         });
 
-        // If live refresh explicitly requested, fetch directly from OpenStreetMap
+        // If live refresh explicitly requested, fetch directly from Google Maps (or OSM fallback)
         if (live === 'true') {
-          console.log(`[OSM] Fetching live places in map bounds [${south}, ${west}, ${north}, ${east}] for category ${category || 'All'}...`);
+          console.log(`[Places] Fetching live places in map bounds [${south}, ${west}, ${north}, ${east}] for category ${category || 'All'}...`);
           try {
-            const discovered = await fetchOSMPlacesInBounds(
-              { south, west, north, east },
-              category && category !== 'All' ? String(category) : undefined
-            );
+            let discovered: any[] = [];
+            if (isGoogleMapsEnabled()) {
+              discovered = await fetchGooglePlacesBounds(
+                { south, west, north, east },
+                category && category !== 'All' ? String(category) : undefined
+              );
+            }
+            if (discovered.length === 0) {
+              discovered = await fetchOSMPlacesInBounds(
+                { south, west, north, east },
+                category && category !== 'All' ? String(category) : undefined
+              );
+            }
+
             if (discovered.length > 0) {
               await saveDiscoveredPlaces(discovered);
               places = await prisma.place.findMany({
@@ -109,8 +129,8 @@ export const getAllPlaces = async (req: Request, res: Response) => {
                 orderBy: { rating: 'desc' }
               });
             }
-          } catch (osmErr) {
-            console.error('[OSM] Error fetching places in bounds:', osmErr);
+          } catch (discoveryErr) {
+            console.error('[Places] Error fetching places in bounds:', discoveryErr);
           }
         }
 
@@ -159,11 +179,18 @@ export const getAllPlaces = async (req: Request, res: Response) => {
         orderBy: { rating: 'desc' }
       });
 
-      // Synchronous Category Hydration from OpenStreetMap if DB count is low (e.g. Wellness)
+      // Synchronous Category Hydration from Google Maps (or OSM fallback) if DB count is low (e.g. Wellness)
       if (category && category !== 'All' && places.length < 5 && !q) {
-        console.log(`[OSM] Low count for category ${category} (${places.length}). Hydrating from OpenStreetMap...`);
+        console.log(`[Places] Low count for category ${category} (${places.length}). Hydrating...`);
         try {
-          const discovered = await fetchOSMPlacesByCategory(String(category));
+          let discovered: any[] = [];
+          if (isGoogleMapsEnabled()) {
+            discovered = await fetchGooglePlacesCat(String(category));
+          }
+          if (discovered.length === 0) {
+            discovered = await fetchOSMPlacesByCategory(String(category));
+          }
+
           if (discovered.length > 0) {
             await saveDiscoveredPlaces(discovered);
             places = await prisma.place.findMany({
@@ -171,16 +198,23 @@ export const getAllPlaces = async (req: Request, res: Response) => {
               orderBy: { rating: 'desc' }
             });
           }
-        } catch (osmErr) {
-          console.error('[OSM] Error hydrating category:', osmErr);
+        } catch (catErr) {
+          console.error('[Places] Error hydrating category:', catErr);
         }
       }
 
       // Synchronous Search Hydration if zero or low results found
       if (q && places.length < 3) {
-        console.log(`[OSM] Low search results for "${q}" (${places.length}). Searching OpenStreetMap...`);
+        console.log(`[Places] Low search results for "${q}" (${places.length}). Searching external APIs...`);
         try {
-          const discovered = await searchOSMPlaces(String(q));
+          let discovered: any[] = [];
+          if (isGoogleMapsEnabled()) {
+            discovered = await searchGooglePlaces(String(q));
+          }
+          if (discovered.length === 0) {
+            discovered = await searchOSMPlaces(String(q));
+          }
+
           if (discovered.length > 0) {
             await saveDiscoveredPlaces(discovered);
             places = await prisma.place.findMany({
@@ -188,8 +222,8 @@ export const getAllPlaces = async (req: Request, res: Response) => {
               orderBy: { rating: 'desc' }
             });
           }
-        } catch (osmErr) {
-          console.error('[OSM] Error searching OSM:', osmErr);
+        } catch (searchErr) {
+          console.error('[Places] Error searching places:', searchErr);
         }
       }
 
