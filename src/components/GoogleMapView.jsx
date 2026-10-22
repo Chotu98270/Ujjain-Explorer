@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { GoogleMap, useJsApiLoader, MarkerF, DirectionsRenderer, InfoWindowF } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, InfoWindowF, OverlayViewF, OverlayView } from "@react-google-maps/api";
 import { categoryColors } from "../data/tokens";
 import { translations } from "../data/translations";
 
@@ -50,23 +50,7 @@ export default memo(function GoogleMapView({
     mapRef.current = null;
   }, []);
 
-  // Update bounds when user drags or zooms
-  const handleIdle = useCallback(() => {
-    if (!mapRef.current || !onBoundsChange) return;
-    const bounds = mapRef.current.getBounds();
-    if (bounds) {
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-      onBoundsChange({
-        north: Number(ne.lat().toFixed(5)),
-        east: Number(ne.lng().toFixed(5)),
-        south: Number(sw.lat().toFixed(5)),
-        west: Number(sw.lng().toFixed(5))
-      });
-    }
-  }, [onBoundsChange]);
-
-  // Recenter map when selected place changes
+  // Update center when selectedPlace changes
   useEffect(() => {
     if (selectedPlace?.latitude && selectedPlace?.longitude && mapRef.current) {
       mapRef.current.panTo({
@@ -76,6 +60,22 @@ export default memo(function GoogleMapView({
       setActiveMarker(selectedPlace);
     }
   }, [selectedPlace]);
+
+  // Handle bounds change on map pan/zoom
+  const handleIdle = useCallback(() => {
+    if (!mapRef.current || !onBoundsChange) return;
+    const bounds = mapRef.current.getBounds();
+    if (bounds) {
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      onBoundsChange({
+        south: sw.lat(),
+        west: sw.lng(),
+        north: ne.lat(),
+        east: ne.lng()
+      });
+    }
+  }, [onBoundsChange]);
 
   // Ultra-Fast Google Directions API Routing
   useEffect(() => {
@@ -148,24 +148,6 @@ export default memo(function GoogleMapView({
     );
   }, [points, mode, isLoaded, onRouteCalculated]);
 
-  const createMarkerSvg = (bgColor, emoji, stopNumber) => {
-    const isBadge = stopNumber !== null && stopNumber !== undefined;
-    const badgeSvg = isBadge
-      ? `<circle cx="28" cy="8" r="8" fill="#1B4965" stroke="#ffffff" stroke-width="1.5"/>
-         <text x="28" y="11" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">${stopNumber}</text>`
-      : "";
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
-        <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 24 18 24s18-10.5 18-24c0-9.94-8.06-18-18-18z" fill="${bgColor}" stroke="#ffffff" stroke-width="2"/>
-        <circle cx="18" cy="18" r="14" fill="#ffffff" />
-        <text x="18" y="23" font-size="14" text-anchor="middle">${emoji}</text>
-        ${badgeSvg}
-      </svg>
-    `;
-    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-  };
-
   if (loadError) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#FAF6EE", padding: 20, textAlign: "center" }}>
@@ -199,23 +181,19 @@ export default memo(function GoogleMapView({
         styles: ujjainMapStyles
       }}
     >
-      {/* User Location Marker */}
+      {/* User Location Pulse Marker */}
       {userLocation?.latitude && userLocation?.longitude && (
-        <MarkerF
+        <OverlayViewF
           position={{ lat: userLocation.latitude, lng: userLocation.longitude }}
-          icon={{
-            path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
-            scale: 8,
-            fillColor: "#1B4965",
-            fillOpacity: 1,
-            strokeColor: "#ffffff",
-            strokeWeight: 3
-          }}
-          title="You are here"
-        />
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+        >
+          <div style={{ transform: "translate(-50%, -50%)", pointerEvents: "none" }}>
+            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#1B4965", border: "2.5px solid #fff", boxShadow: "0 0 10px rgba(27,73,101,0.7)" }} />
+          </div>
+        </OverlayViewF>
       )}
 
-      {/* Places Markers with Numbered Itinerary Badges */}
+      {/* Places Markers with Circular Photo Icons & Numbered Badges */}
       {places
         .filter((p) => p.latitude && p.longitude)
         .map((place) => {
@@ -224,22 +202,112 @@ export default memo(function GoogleMapView({
           );
           const stopNumber = stopIndex !== -1 ? stopIndex + 1 : null;
           const catStyle = categoryColors[place.category] || categoryColors.default;
-          const markerIconUrl = createMarkerSvg(catStyle.color, place.emoji || "📍", stopNumber);
+          const borderColor = catStyle.color || "#D9531E";
+          const isSelected = activeMarker?.name?.toLowerCase() === place.name?.toLowerCase();
 
           return (
-            <MarkerF
+            <OverlayViewF
               key={place.id || place.osmId || place.name}
               position={{ lat: Number(place.latitude), lng: Number(place.longitude) }}
-              icon={{
-                url: markerIconUrl,
-                scaledSize: new window.google.maps.Size(36, 42),
-                anchor: new window.google.maps.Point(18, 42)
-              }}
-              onClick={() => {
-                setActiveMarker(place);
-                if (onSelectPlace) onSelectPlace(place);
-              }}
-            />
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            >
+              <div
+                onClick={() => {
+                  setActiveMarker(place);
+                  if (onSelectPlace) onSelectPlace(place);
+                }}
+                title={place.name}
+                style={{
+                  position: "relative",
+                  transform: isSelected ? "translate(-50%, -100%) scale(1.15)" : "translate(-50%, -100%)",
+                  cursor: "pointer",
+                  userSelect: "none",
+                  transition: "transform 0.15s ease",
+                  filter: isSelected ? "drop-shadow(0 6px 12px rgba(0,0,0,0.4))" : "drop-shadow(0 3px 6px rgba(0,0,0,0.25))",
+                }}
+              >
+                {/* Circular Photo Avatar */}
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    background: "#FAF6EE",
+                    border: `3px solid ${borderColor}`,
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                  }}
+                >
+                  {place.image ? (
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const span = e.currentTarget.nextElementSibling;
+                        if (span) span.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    style={{
+                      display: place.image ? "none" : "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                    }}
+                  >
+                    {place.emoji || "📍"}
+                  </span>
+                </div>
+
+                {/* Bottom Pointer Caret */}
+                <div
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderLeft: "6px solid transparent",
+                    borderRight: "6px solid transparent",
+                    borderTop: `7px solid ${borderColor}`,
+                    margin: "-1px auto 0 auto",
+                  }}
+                />
+
+                {/* Itinerary Number Badge */}
+                {stopNumber !== null && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: -4,
+                      right: -4,
+                      background: "#1B4965",
+                      color: "#ffffff",
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      border: "2px solid #ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    {stopNumber}
+                  </div>
+                )}
+              </div>
+            </OverlayViewF>
           );
         })}
 
@@ -248,19 +316,43 @@ export default memo(function GoogleMapView({
         <InfoWindowF
           position={{ lat: Number(activeMarker.latitude), lng: Number(activeMarker.longitude) }}
           onCloseClick={() => setActiveMarker(null)}
+          options={{ pixelOffset: new window.google.maps.Size(0, -48) }}
         >
-          <div style={{ minWidth: 160, padding: 4, fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ width: 190, padding: 2, fontFamily: "'Inter', sans-serif" }}>
+            {activeMarker.image && (
+              <div
+                style={{
+                  width: "100%",
+                  height: 95,
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  marginBottom: 8,
+                  background: "#FAF6EE",
+                }}
+              >
+                <img
+                  src={activeMarker.image}
+                  alt={activeMarker.name}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
+            )}
             <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
               <span style={{ fontSize: 16 }}>{activeMarker.emoji || "📍"}</span>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1C1412" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1C1412", lineHeight: 1.2 }}>
                 {(userLanguage === "Hindi" || userLanguage === "Marathi" || userLanguage === "Sanskrit") && activeMarker.name_mr
                   ? activeMarker.name_mr
                   : activeMarker.name}
               </div>
             </div>
-            <div style={{ fontSize: 11, color: "#6B5B52", marginBottom: 8 }}>
-              ⭐ {(Number(activeMarker.rating) || 4.5).toFixed(1)} · {activeMarker.category}
+            <div style={{ fontSize: 11, color: "#6B5B52", marginBottom: 6 }}>
+              ⭐ {(Number(activeMarker.rating) || 4.8).toFixed(1)} · {activeMarker.category}
             </div>
+            {activeMarker.hours && (
+              <div style={{ fontSize: 10, color: "#9E2A2B", marginBottom: 8, fontWeight: 500 }}>
+                🕐 {activeMarker.hours}
+              </div>
+            )}
 
             {stops.some((s) => s.name.toLowerCase() === activeMarker.name.toLowerCase()) ? (
               <button

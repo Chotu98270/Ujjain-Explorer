@@ -148,23 +148,29 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
     }
   };
 
-  // Custom marker creators with dynamic numbered badges for itinerary stops
-  const createCustomIcon = (color, emoji, stopNumber = null) =>
+  // Custom marker creators with circular photo thumbnail and dynamic numbered badges
+  const createCustomIcon = (color, emoji, stopNumber = null, image = null) =>
     L.divIcon({
       html: `
-        <div style="position: relative; background-color: ${color}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.25); font-size: 16px;">
-          ${emoji}
+        <div style="position: relative; width: 44px; height: 50px; cursor: pointer; user-select: none;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; background: #FAF6EE; border: 3px solid ${color}; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.3); position: relative;">
+            ${image ? `
+              <img src="${image}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+            ` : ""}
+            <span style="display: ${image ? "none" : "flex"}; align-items: center; justify-content: center; font-size: 18px;">${emoji}</span>
+          </div>
+          <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 7px solid ${color}; margin: -1px auto 0 auto;"></div>
           ${stopNumber !== null ? `
-            <div style="position: absolute; top: -6px; right: -6px; background-color: #3D3680; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 1.5px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            <div style="position: absolute; top: -4px; right: -4px; background-color: #1B4965; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.25);">
               ${stopNumber}
             </div>
           ` : ""}
         </div>
       `,
       className: "custom-pin-icon",
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      iconSize: [44, 50],
+      iconAnchor: [22, 50],
+      popupAnchor: [0, -50],
     });
 
   const userIcon = L.divIcon({
@@ -824,14 +830,19 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
                   <Marker
                     key={place.id || place.osmId || place.name}
                     position={[Number(place.latitude), Number(place.longitude)]}
-                    icon={createCustomIcon(getCategoryColor(place.category), place.emoji || "📍", stopNumber)}
+                    icon={createCustomIcon(getCategoryColor(place.category), place.emoji || "📍", stopNumber, place.image)}
                   >
                     <Popup>
-                      <div style={{ minWidth: 150, padding: "2px 0", fontFamily: "'Inter', sans-serif" }}>
+                      <div style={{ minWidth: 160, padding: "2px 0", fontFamily: "'Inter', sans-serif" }}>
+                        {place.image && (
+                          <div style={{ width: "100%", height: 85, borderRadius: 6, overflow: "hidden", marginBottom: 6 }}>
+                            <img src={place.image} alt={place.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                        )}
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
                           <span style={{ fontSize: 16 }}>{place.emoji}</span>
                           <div style={{ fontSize: 12, fontWeight: 700, color: "#1C1412", lineHeight: 1.2 }}>
-                            {userLanguage === "Marathi" && place.name_mr ? place.name_mr : place.name}
+                            {["Marathi", "Hindi", "Sanskrit"].includes(userLanguage) && place.name_mr ? place.name_mr : place.name}
                           </div>
                         </div>
                         <div style={{ fontSize: 10, color: "#6B5B52", marginBottom: 8, display: "flex", gap: 6, alignItems: "center" }}>

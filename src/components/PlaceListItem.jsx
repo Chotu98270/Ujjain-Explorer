@@ -29,14 +29,44 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
           height: 64,
           borderRadius: 12,
           flexShrink: 0,
-          background: place.bgColor,
+          background: place.bgColor || "#FDF2EC",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: 28,
+          overflow: "hidden",
+          position: "relative",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
         }}
       >
-        {place.emoji}
+        {place.image ? (
+          <img
+            src={place.image}
+            alt={place.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const fallbackSpan = e.currentTarget.nextElementSibling;
+              if (fallbackSpan) fallbackSpan.style.display = "flex";
+            }}
+          />
+        ) : null}
+        <span
+          style={{
+            display: place.image ? "none" : "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {place.emoji || "📍"}
+        </span>
       </div>
 
       {/* Body */}

@@ -42,6 +42,23 @@ export const inferCategoryFromTypes = (types: string[] = []): string => {
   return 'Heritage';
 };
 
+export const getKnownPlaceImage = (name: string): string | null => {
+  const n = name.toLowerCase();
+  if (n.includes('mahakal')) return '/images/places/mahakaleshwar.jpg';
+  if (n.includes('bhairav')) return '/images/places/kal_bhairav.jpg';
+  if (n.includes('harsiddhi')) return '/images/places/harsiddhi.jpg';
+  if (n.includes('ram ghat') || n.includes('shipra') || n.includes('kshipra')) return '/images/places/ram_ghat.jpg';
+  if (n.includes('sandipani') || n.includes('ashram')) return '/images/places/sandipani.jpg';
+  if (n.includes('mangal')) return '/images/places/mangalnath.jpg';
+  if (n.includes('vedh') || n.includes('jantar')) return '/images/places/vedh_shala.jpg';
+  if (n.includes('chintaman') || n.includes('ganesh')) return '/images/places/chintaman_ganesh.jpg';
+  if (n.includes('bhartrihari') || n.includes('gadkalika')) return '/images/places/bhartrihari.jpg';
+  if (n.includes('kaliadeh')) return '/images/places/kaliadeh_palace.jpg';
+  if (n.includes('vikram')) return '/images/places/vikram_kirti.jpg';
+  if (n.includes('sarafa') || n.includes('food') || n.includes('bafla') || n.includes('poha')) return '/images/places/sarafa_bazaar.jpg';
+  return null;
+};
+
 /**
  * Normalizes Google Places (New) result into Ujjain Explorer Place model
  */
@@ -59,10 +76,17 @@ export const transformGooglePlace = (p: any, forcedCategory?: string): any => {
   const hours = p.regularOpeningHours?.weekdayDescriptions?.[0] || 'Open Daily';
   const description = p.editorialSummary?.text || `Sacred and historic destination in Ujjain: ${name}.`;
 
+  const localImage = getKnownPlaceImage(name);
+  const photoUrl = localImage || (p.photos?.[0]?.name 
+    ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=800&key=${GOOGLE_API_KEY}`
+    : null);
+
   return {
     osmId: `google:${p.id}`,
     name,
     name_mr: p.displayName.languageCode === 'mr' || p.displayName.languageCode === 'hi' ? name : null,
+    image: photoUrl,
+    photos: photoUrl ? [photoUrl] : [],
     emoji: mapCategoryEmoji(category),
     category,
     rating: typeof p.rating === 'number' ? Number(p.rating.toFixed(1)) : 4.5,
@@ -110,7 +134,7 @@ export const searchGooglePlaces = async (query: string, maxResults: number = 8):
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': GOOGLE_API_KEY,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber,places.photos'
         },
         timeout: 4000
       }
@@ -158,7 +182,7 @@ export const fetchGooglePlacesByCategory = async (
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': GOOGLE_API_KEY,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber,places.photos'
         },
         timeout: 4000
       }
@@ -215,7 +239,7 @@ export const fetchGooglePlacesInBounds = async (
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': GOOGLE_API_KEY,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.editorialSummary,places.regularOpeningHours,places.internationalPhoneNumber,places.photos'
         },
         timeout: 4000
       }
