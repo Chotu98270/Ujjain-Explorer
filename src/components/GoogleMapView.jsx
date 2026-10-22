@@ -38,6 +38,7 @@ export default memo(function GoogleMapView({
 
   const [activeMarker, setActiveMarker] = useState(null);
   const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [googlePhotos, setGooglePhotos] = useState({});
   const mapRef = useRef(null);
 
   const defaultCenter = { lat: 23.1828, lng: 75.7682 }; // Shri Mahakaleshwar Jyotirlinga, Ujjain
@@ -49,6 +50,38 @@ export default memo(function GoogleMapView({
   const onUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
+
+  // Fetch official Google Maps Place Photos using PlacesService
+  useEffect(() => {
+    if (!isLoaded || !mapRef.current || !window.google?.maps?.places || places.length === 0) return;
+
+    try {
+      const placesService = new window.google.maps.places.PlacesService(mapRef.current);
+
+      places.slice(0, 12).forEach((place) => {
+        if (!place.name || googlePhotos[place.name]) return;
+
+        const request = {
+          query: `${place.name} Ujjain`,
+          fields: ["name", "photos", "place_id"]
+        };
+
+        placesService.findPlaceFromQuery(request, (results, status) => {
+          if (
+            status === window.google.maps.places.PlacesServiceStatus.OK &&
+            results?.[0]?.photos?.length > 0
+          ) {
+            const photoUrl = results[0].photos[0].getUrl({ maxWidth: 600, maxHeight: 600 });
+            if (photoUrl) {
+              setGooglePhotos((prev) => ({ ...prev, [place.name]: photoUrl }));
+            }
+          }
+        });
+      });
+    } catch (err) {
+      console.warn("[Google Places Photo] Service fetch:", err.message);
+    }
+  }, [isLoaded, places]);
 
   // Update center when selectedPlace changes
   useEffect(() => {
@@ -204,6 +237,7 @@ export default memo(function GoogleMapView({
           const catStyle = categoryColors[place.category] || categoryColors.default;
           const borderColor = catStyle.color || "#D9531E";
           const isSelected = activeMarker?.name?.toLowerCase() === place.name?.toLowerCase();
+          const markerPhoto = googlePhotos[place.name] || place.image;
 
           return (
             <OverlayViewF
@@ -241,9 +275,9 @@ export default memo(function GoogleMapView({
                     position: "relative",
                   }}
                 >
-                  {place.image ? (
+                  {markerPhoto ? (
                     <img
-                      src={place.image}
+                      src={markerPhoto}
                       alt={place.name}
                       style={{
                         width: "100%",
@@ -260,7 +294,7 @@ export default memo(function GoogleMapView({
                   ) : null}
                   <span
                     style={{
-                      display: place.image ? "none" : "flex",
+                      display: markerPhoto ? "none" : "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: 18,
@@ -319,7 +353,7 @@ export default memo(function GoogleMapView({
           options={{ pixelOffset: new window.google.maps.Size(0, -48) }}
         >
           <div style={{ width: 190, padding: 2, fontFamily: "'Inter', sans-serif" }}>
-            {activeMarker.image && (
+            {(googlePhotos[activeMarker.name] || activeMarker.image) && (
               <div
                 style={{
                   width: "100%",
@@ -331,7 +365,7 @@ export default memo(function GoogleMapView({
                 }}
               >
                 <img
-                  src={activeMarker.image}
+                  src={googlePhotos[activeMarker.name] || activeMarker.image}
                   alt={activeMarker.name}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
