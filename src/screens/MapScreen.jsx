@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import StatusBar from "../components/StatusBar";
+import GoogleMapView from "../components/GoogleMapView";
 import { fetchPlaces, fetchItinerary, updateStopStatus, deleteStopFromItinerary, addStopToItinerary } from "../data/api";
 import { translations } from "../data/translations";
 import { categories } from "../data/puneData";
@@ -94,6 +95,25 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [directions, setDirections] = useState([]);
   const [showDirections, setShowDirections] = useState(false);
+
+  // Google Maps Platform Integration State
+  const [googleApiKey, setGoogleApiKey] = useState(() => import.meta.env.VITE_GOOGLE_MAPS_API_KEY || localStorage.getItem("google_maps_api_key") || "");
+  const [isKeyInputOpen, setIsKeyInputOpen] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
+
+  const handleSaveApiKey = (keyToSave) => {
+    const key = (keyToSave || tempApiKey).trim();
+    if (key) {
+      localStorage.setItem("google_maps_api_key", key);
+      setGoogleApiKey(key);
+      setIsKeyInputOpen(false);
+    }
+  };
+
+  const handleGoogleRouteCalculated = useCallback(({ distanceKm, durationSec, directions }) => {
+    setRouteStats({ distanceKm, durationSec });
+    setDirections(directions);
+  }, []);
 
   const t = translations[userLanguage] || translations.English;
 
@@ -640,134 +660,241 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
           </button>
         )}
 
-        {/* Live OpenStreetMap Status Indicator */}
+        {/* Live Map Engine Status Indicator */}
         <div
+          onClick={() => setIsKeyInputOpen(true)}
           style={{
             position: "absolute",
             bottom: 10,
             left: 10,
             zIndex: 1000,
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(4px)",
-            padding: "4px 9px",
+            padding: "5px 10px",
             borderRadius: 12,
             fontSize: 10,
-            fontWeight: 600,
-            color: "#4A6741",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+            fontWeight: 700,
+            color: googleApiKey ? "#15803D" : "#B45309",
+            border: `1px solid ${googleApiKey ? "#BBF7D0" : "#FDE68A"}`,
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
             display: "flex",
             alignItems: "center",
-            gap: 5
+            gap: 6,
+            cursor: "pointer"
           }}
         >
-          <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", backgroundColor: "#22C55E" }}></span>
-          <span>{userLanguage === "Marathi" ? "थेट नकाशा माहिती" : "Live Map Active"}</span>
+          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", backgroundColor: googleApiKey ? "#22C55E" : "#F59E0B" }}></span>
+          <span>{googleApiKey ? "Google Maps Engine (Fast ⚡)" : "OpenStreetMap (Tap for Google Maps ⚡)"}</span>
         </div>
 
-        <MapContainer
-          center={mapCenter}
-          zoom={13}
-          style={{ width: "100%", height: "100%" }}
-          zoomControl={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          />
-
-          <RecenterMap center={mapCenter} />
-          <MapBoundsTracker onBoundsChange={handleBoundsChange} />
-
-          {/* User Location Marker */}
-          {userLocation?.latitude && userLocation?.longitude && (
-            <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
-              <Popup>
-                <div style={{ fontSize: 11, fontWeight: 600 }}>{userLanguage === "Marathi" ? "तुम्ही येथे आहात" : "You are here"}</div>
-              </Popup>
-            </Marker>
-          )}
-
-          {/* Dynamic Places Markers (with custom numbered badges for stops) */}
-          {places
-            .filter((p) => p.latitude && p.longitude)
-            .map((place) => {
-              const stopIndex = stops.findIndex(s => s.name.toLowerCase() === place.name.toLowerCase());
-              const stopNumber = stopIndex !== -1 ? stopIndex + 1 : null;
-              
-              return (
-                <Marker
-                  key={place.id || place.osmId || place.name}
-                  position={[Number(place.latitude), Number(place.longitude)]}
-                  icon={createCustomIcon(getCategoryColor(place.category), place.emoji || "📍", stopNumber)}
+        {/* Google Maps API Key Setup Modal */}
+        {isKeyInputOpen && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 2000,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16
+            }}
+          >
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: 16,
+                padding: 20,
+                width: "100%",
+                maxWidth: 320,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 20 }}>⚡</span>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "#1C1412" }}>Google Maps Setup</div>
+              </div>
+              <p style={{ fontSize: 12, color: "#6B5B52", lineHeight: 1.4, marginBottom: 14 }}>
+                Enter your Google Maps Platform API Key (starts with <code>AIzaSy...</code>) to enable ultra-fast maps and routing:
+              </p>
+              <input
+                type="text"
+                placeholder="AIzaSy..."
+                defaultValue={googleApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "1.5px solid #D9531E",
+                  fontSize: 12,
+                  fontFamily: "monospace",
+                  outline: "none",
+                  marginBottom: 12
+                }}
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => handleSaveApiKey()}
+                  style={{
+                    flex: 1,
+                    background: "#D9531E",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "9px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  }}
                 >
-                  <Popup>
-                    <div style={{ minWidth: 150, padding: "2px 0", fontFamily: "'Inter', sans-serif" }}>
-                      <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
-                        <span style={{ fontSize: 16 }}>{place.emoji}</span>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#1C1412", lineHeight: 1.2 }}>
-                          {userLanguage === "Marathi" && place.name_mr ? place.name_mr : place.name}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 10, color: "#6B5B52", marginBottom: 8, display: "flex", gap: 6, alignItems: "center" }}>
-                        <span>⭐ {(Number(place.rating) || 4.5).toFixed(1)}</span>
-                        <span>•</span>
-                        <span>{userLanguage === "Marathi" ? (translations.Marathi[place.category?.toLowerCase()] || place.category) : place.category}</span>
-                      </div>
-                      
-                      {stopIndex !== -1 ? (
-                        <button
-                          onClick={() => {
-                            const stop = stops[stopIndex];
-                            if (stop) handleDeleteStop(stop.id);
-                          }}
-                          style={{
-                            width: "100%",
-                            background: "#F2EAE7",
-                            color: "#8B3A2A",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "5px",
-                            fontSize: 10,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          ❌ {userLanguage === "Marathi" ? "थांबा काढा" : "Remove Stop"}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleAddPlaceToItinerary(place)}
-                          style={{
-                            width: "100%",
-                            background: "#8B3A2A",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "5px",
-                            fontSize: 10,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          📅 {userLanguage === "Marathi" ? "सहलीत जोडा" : "Add to Itinerary"}
-                        </button>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
+                  Save & Activate
+                </button>
+                <button
+                  onClick={() => setIsKeyInputOpen(false)}
+                  style={{
+                    background: "#EDE8DF",
+                    color: "#1C1412",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "9px 14px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-          {/* Connected route line with Flowing Dash Animation */}
-          {(routeGeometry.length > 0 ? routeGeometry : points).length > 1 && (
-            <Polyline 
-              positions={routeGeometry.length > 0 ? routeGeometry : points} 
-              color={isItineraryRoute ? "#8B3A2A" : "#3D3680"} 
-              weight={isItineraryRoute ? 4.5 : 5.5} 
-              pathOptions={{ className: "flowing-route" }}
+        {googleApiKey ? (
+          <GoogleMapView
+            apiKey={googleApiKey}
+            places={places}
+            stops={stops}
+            selectedPlace={selectedPlace}
+            onSelectPlace={setSelectedPlace}
+            userLocation={userLocation}
+            userLanguage={userLanguage}
+            mode={mode}
+            points={points}
+            onRouteCalculated={handleGoogleRouteCalculated}
+            onAddStop={handleAddPlaceToItinerary}
+            onDeleteStop={handleDeleteStop}
+            onBoundsChange={handleBoundsChange}
+            isMapExpanded={isMapExpanded}
+          />
+        ) : (
+          <MapContainer
+            center={mapCenter}
+            zoom={13}
+            style={{ width: "100%", height: "100%" }}
+            zoomControl={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
-          )}
-        </MapContainer>
+
+            <RecenterMap center={mapCenter} />
+            <MapBoundsTracker onBoundsChange={handleBoundsChange} />
+
+            {/* User Location Marker */}
+            {userLocation?.latitude && userLocation?.longitude && (
+              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
+                <Popup>
+                  <div style={{ fontSize: 11, fontWeight: 600 }}>{userLanguage === "Marathi" ? "तुम्ही येथे आहात" : "You are here"}</div>
+                </Popup>
+              </Marker>
+            )}
+
+            {/* Dynamic Places Markers (with custom numbered badges for stops) */}
+            {places
+              .filter((p) => p.latitude && p.longitude)
+              .map((place) => {
+                const stopIndex = stops.findIndex(s => s.name.toLowerCase() === place.name.toLowerCase());
+                const stopNumber = stopIndex !== -1 ? stopIndex + 1 : null;
+                
+                return (
+                  <Marker
+                    key={place.id || place.osmId || place.name}
+                    position={[Number(place.latitude), Number(place.longitude)]}
+                    icon={createCustomIcon(getCategoryColor(place.category), place.emoji || "📍", stopNumber)}
+                  >
+                    <Popup>
+                      <div style={{ minWidth: 150, padding: "2px 0", fontFamily: "'Inter', sans-serif" }}>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
+                          <span style={{ fontSize: 16 }}>{place.emoji}</span>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "#1C1412", lineHeight: 1.2 }}>
+                            {userLanguage === "Marathi" && place.name_mr ? place.name_mr : place.name}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 10, color: "#6B5B52", marginBottom: 8, display: "flex", gap: 6, alignItems: "center" }}>
+                          <span>⭐ {(Number(place.rating) || 4.5).toFixed(1)}</span>
+                          <span>•</span>
+                          <span>{userLanguage === "Marathi" ? (translations.Marathi[place.category?.toLowerCase()] || place.category) : place.category}</span>
+                        </div>
+                        
+                        {stopIndex !== -1 ? (
+                          <button
+                            onClick={() => {
+                              const stop = stops[stopIndex];
+                              if (stop) handleDeleteStop(stop.id);
+                            }}
+                            style={{
+                              width: "100%",
+                              background: "#F2EAE7",
+                              color: "#8B3A2A",
+                              border: "none",
+                              borderRadius: 6,
+                              padding: "5px",
+                              fontSize: 10,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            ❌ {userLanguage === "Marathi" ? "थांबा काढा" : "Remove Stop"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleAddPlaceToItinerary(place)}
+                            style={{
+                              width: "100%",
+                              background: "#8B3A2A",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: 6,
+                              padding: "5px",
+                              fontSize: 10,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            📅 {userLanguage === "Marathi" ? "सहलीत जोडा" : "Add to Itinerary"}
+                          </button>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+
+            {/* Connected route line with Flowing Dash Animation */}
+            {(routeGeometry.length > 0 ? routeGeometry : points).length > 1 && (
+              <Polyline 
+                positions={routeGeometry.length > 0 ? routeGeometry : points} 
+                color={isItineraryRoute ? "#8B3A2A" : "#3D3680"} 
+                weight={isItineraryRoute ? 4.5 : 5.5} 
+                pathOptions={{ className: "flowing-route" }}
+              />
+            )}
+          </MapContainer>
+        )}
       </div>
 
       {/* Interactive Routing Card */}
