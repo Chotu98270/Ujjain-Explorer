@@ -2,21 +2,22 @@ import { useState, useEffect } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceCard from "../components/PlaceCard";
 import ThemeSwitcher from "../components/ThemeSwitcher";
-import { categories } from "../data/puneData";
+import { categories, places as fallbackPlaces, events as fallbackEvents } from "../data/puneData";
 import { fetchPlaces, fetchEvents } from "../data/api";
 import { translations } from "../data/translations";
 
 export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation, userLanguage, weatherData, onWeatherToggle }) {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [places, setPlaces] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [places, setPlaces] = useState(() => (fallbackPlaces || []).slice(0, 4));
+  const [events, setEvents] = useState(() => fallbackEvents || []);
+  const [loading, setLoading] = useState(false);
   const [showAllEvents, setShowAllEvents] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const t = translations[userLanguage] || translations.English;
 
   useEffect(() => {
+    let isMounted = true;
     const loadData = async () => {
       setLoading(true);
       try {
@@ -24,30 +25,23 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
           fetchPlaces({ category: activeCategory }),
           fetchEvents()
         ]);
-        setPlaces(placesData.slice(0, 4));
-        setEvents(eventsData);
+        if (isMounted) {
+          if (Array.isArray(placesData) && placesData.length > 0) {
+            setPlaces(placesData.slice(0, 4));
+          }
+          if (Array.isArray(eventsData) && eventsData.length > 0) {
+            setEvents(eventsData);
+          }
+        }
       } catch (error) {
         console.error("Failed to load home data:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     loadData();
+    return () => { isMounted = false; };
   }, [activeCategory]);
-
-  if (loading && places.length === 0) {
-    return (
-      <div style={{ background: "var(--bg-primary, #0E0E10)", minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 600 }}>
-          {userLanguage === "Hindi" ? "उज्जैन दर्शन लोड हो रहा है..." :
-           userLanguage === "Sanskrit" ? "अवन्तिका दर्शनम् प्रस्तूयते..." :
-           userLanguage === "Marathi" ? "उज्जैन लोड होत आहे..." :
-           userLanguage === "Gujarati" ? "ઉજ્જૈન દર્શન લોડ થઈ રહ્યું છે..." :
-           "Loading Ujjain Explorer..."}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={{ background: "var(--bg-primary, #0E0E10)", minHeight: "100%", height: "100%", overflowY: "auto", paddingBottom: 84, transition: "background 0.3s ease" }}>

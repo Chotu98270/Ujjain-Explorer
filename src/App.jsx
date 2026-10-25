@@ -106,31 +106,25 @@ function MainApp() {
   };
 
   return (
-    <div className="flex justify-center items-stretch sm:items-start min-h-screen bg-black sm:bg-[#08080A] sm:py-6 transition-colors duration-300">
+    <div 
+      className="flex justify-center items-center min-h-screen p-0 sm:py-4 transition-colors duration-300"
+      style={{
+        background: "radial-gradient(ellipse at 50% 20%, #2E1810 0%, #1A0E08 50%, #0C0704 100%)",
+        minHeight: "100vh",
+        width: "100vw",
+      }}
+    >
       <div
-        className="relative overflow-hidden flex flex-col w-full h-[100dvh] sm:h-auto sm:w-[390px] sm:min-h-[820px] sm:rounded-[44px] sm:border-2 transition-all duration-300"
+        className="relative flex flex-col w-full h-[100dvh] sm:h-[94vh] sm:max-h-[880px] sm:max-w-[430px] sm:rounded-[36px] sm:border-2 overflow-hidden shadow-2xl transition-all duration-300"
         style={{
           background: "var(--bg-primary, #0E0E10)",
-          borderColor: "var(--border-color, rgba(212,175,55,0.3))",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.8)",
+          borderColor: "var(--border-color, rgba(212,175,55,0.35))",
+          boxShadow: "0 25px 65px rgba(0,0,0,0.75), 0 0 50px rgba(255,153,51,0.15)",
           fontFamily: "var(--font-body, 'Inter', sans-serif)",
         }}
       >
-        {/* Decorative Notch */}
-        <div
-          className="mx-auto z-10 hidden sm:block"
-          style={{
-            width: 130,
-            height: 26,
-            background: "#050505",
-            borderRadius: "0 0 16px 16px",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderTop: "none"
-          }}
-        />
-
-        {/* Screen Content Container */}
-        <div className="flex-1 relative overflow-hidden" style={{ background: "var(--bg-primary, #0E0E10)" }}>
+        {/* Screen Content Container with reliable flex-1 and min-h-0 */}
+        <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden" style={{ background: "var(--bg-primary, #0E0E10)" }}>
           <Suspense fallback={
             <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 700, fontSize: 13 }}>

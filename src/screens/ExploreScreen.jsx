@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceListItem from "../components/PlaceListItem";
 import ThemeSwitcher from "../components/ThemeSwitcher";
-import { categories } from "../data/puneData";
+import { categories, places as fallbackPlaces } from "../data/puneData";
 import { fetchPlaces } from "../data/api";
 import { translations } from "../data/translations";
 
 export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userLocation, userLanguage }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState(initialParams.q || "");
-  const [places, setPlaces] = useState([]);
+  const [places, setPlaces] = useState(() => fallbackPlaces || []);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(initialParams.showFilters || false);
   const [sortBy, setSortBy] = useState("rating"); // 'rating' or 'name'
