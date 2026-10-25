@@ -320,24 +320,6 @@
           ],
           "done": false,
           "order": 4
-        },
-        {
-          "id": 17,
-          "itineraryDayId": 5,
-          "time": "TBD",
-          "name": "Shri Mahakaleshwar Jyotirlinga",
-          "name_mr": "श्री महाकालेश्वर ज्योतिर्लिंग",
-          "desc": "One of the 12 sacred Jyotirlingas of Lord Shiva. The presiding deity is Dakshinmukhi (south-facing), unique among all Jyotirlingas. World-renowned for its mystical 4:00 AM Bhasma Aarti and the sprawling Mahakal Lok Corridor.",
-          "desc_mr": "भगवान शिव के १२ द्वादश ज्योतिर्लिंगों में से एक अत्यंत पावन धाम। यह एकमात्र दक्षिणमुखी ज्योतिर्लिंग है। यहाँ की प्रातःकालीन भस्म आरती और भव्य महाकाल लोक कॉरिडोर विश्वभर में प्रसिद्ध हैं।",
-          "dotColor": "#D9531E",
-          "tags": [
-            {
-              "label": "Temple",
-              "type": "temple"
-            }
-          ],
-          "done": false,
-          "order": 5
         }
       ]
     },
@@ -390,6 +372,6 @@
     "user": 4,
     "savedPlace": 1,
     "itineraryDay": 7,
-    "itineraryStop": 18
+    "itineraryStop": 17
   }
 }

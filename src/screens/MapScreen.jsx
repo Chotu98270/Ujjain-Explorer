@@ -75,7 +75,7 @@ function MapBoundsTracker({ onBoundsChange }) {
   return null;
 }
 
-export default function MapScreen({ userLocation, userLanguage, weatherData, initialPlace, onClearInitialPlace }) {
+export default function MapScreen({ userLocation, userLanguage, weatherData }) {
   const [mode, setMode] = useState("Walking");
   const [activeFilter, setActiveFilter] = useState("All");
   const [stops, setStops] = useState([]);
@@ -86,20 +86,6 @@ export default function MapScreen({ userLocation, userLanguage, weatherData, ini
   const [routeGeometry, setRouteGeometry] = useState([]);
   const [routeStats, setRouteStats] = useState({ distanceKm: 0, durationSec: 0 });
   const [completedStopId, setCompletedStopId] = useState(null);
-
-  // Sync initial target place if passed from PlaceDetail or elsewhere
-  useEffect(() => {
-    if (initialPlace && (initialPlace.latitude || initialPlace.lat)) {
-      const lat = Number(initialPlace.latitude || initialPlace.lat);
-      const lng = Number(initialPlace.longitude || initialPlace.lng);
-      setMapCenter([lat, lng]);
-      setSelectedPlace(initialPlace);
-      setShowDirections(true);
-      if (onClearInitialPlace) {
-        onClearInitialPlace();
-      }
-    }
-  }, [initialPlace]);
 
   // Live Map Viewport Retrieval State
   const [currentBounds, setCurrentBounds] = useState(null);
@@ -352,12 +338,12 @@ export default function MapScreen({ userLocation, userLanguage, weatherData, ini
     points = routePoints;
     isItineraryRoute = true;
   } else if (selectedPlace?.latitude && selectedPlace?.longitude) {
-    const originLat = userLocation?.latitude ? Number(userLocation.latitude) : 23.1815; // Ujjain Junction Station as reliable fallback origin
-    const originLng = userLocation?.longitude ? Number(userLocation.longitude) : 75.7738;
-    points = [
-      [originLat, originLng],
-      [Number(selectedPlace.latitude), Number(selectedPlace.longitude)]
-    ];
+    if (userLocation?.latitude && userLocation?.longitude) {
+      points = [
+        [Number(userLocation.latitude), Number(userLocation.longitude)],
+        [Number(selectedPlace.latitude), Number(selectedPlace.longitude)]
+      ];
+    }
   }
 
   // Calculate dynamic physical distance
@@ -979,24 +965,22 @@ export default function MapScreen({ userLocation, userLanguage, weatherData, ini
               </button>
             )}
             <button
-              onClick={() => setShowDirections((prev) => !prev)}
+              onClick={() => window.open(getGoogleMapsDirUrl(), '_blank')}
               style={{
-                background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
-                color: "var(--cta-text, #0E0E10)",
+                background: "#8B3A2A",
+                color: "#fff",
                 border: "none",
                 borderRadius: 10,
-                padding: "7px 14px",
+                padding: "7px 12px",
                 fontSize: 11,
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: 5,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                gap: 4
               }}
-              title="View in-app turn-by-turn route steps"
             >
-              🧭 {showDirections ? (userLanguage === "Hindi" ? "नक्शा देखें" : "Hide Steps") : (userLanguage === "Hindi" ? "दिशा-निर्देश" : userLanguage === "Marathi" ? "मार्गदर्शन" : "Directions")}
+              🧭 {userLanguage === "Marathi" ? "मार्गदर्शन" : "Navigate"} ↗
             </button>
           </div>
         </div>

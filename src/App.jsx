@@ -15,7 +15,6 @@ const PlaceDetailScreen = lazy(() => import("./screens/PlaceDetailScreen"));
 function MainApp() {
   const [activeTab, setActiveTab] = useState("home");
   const [selectedPlace, setSelectedPlace] = useState(null);
-  const [mapTargetPlace, setMapTargetPlace] = useState(null);
   const [exploreParams, setExploreParams] = useState({});
   const { location: userLocation } = useUserLocation();
   const [userLanguage, setUserLanguage] = useState(() => localStorage.getItem("pune_user_lang") || "English");
@@ -58,11 +57,6 @@ function MainApp() {
     setActiveTab("detail");
   };
 
-  const handleNavigateToMap = (place) => {
-    setMapTargetPlace(place);
-    setActiveTab("map");
-  };
-
   const handleBack = () => {
     setSelectedPlace(null);
     setActiveTab("explore");
@@ -99,31 +93,13 @@ function MainApp() {
       case "explore":
         return <ExploreScreen onPlaceSelect={handlePlaceSelect} initialParams={exploreParams} userLocation={userLocation} userLanguage={userLanguage} />;
       case "map":
-        return (
-          <MapScreen 
-            userLocation={userLocation} 
-            userLanguage={userLanguage} 
-            weatherData={weatherData} 
-            initialPlace={mapTargetPlace}
-            onClearInitialPlace={() => setMapTargetPlace(null)}
-          />
-        );
+        return <MapScreen userLocation={userLocation} userLanguage={userLanguage} weatherData={weatherData} />;
       case "plan":
         return <PlanScreen userLocation={userLocation} userLanguage={userLanguage} weatherData={weatherData} onWeatherToggle={handleWeatherToggle} onOpenAuth={handleOpenAuth} user={user} />;
       case "profile":
         return <ProfileScreen onPlaceSelect={handlePlaceSelect} userLocation={userLocation} userLanguage={userLanguage} setUserLanguage={setUserLanguage} onLogout={handleLogout} onOpenAuth={handleOpenAuth} user={user} />;
       case "detail":
-        return (
-          <PlaceDetailScreen 
-            place={selectedPlace} 
-            onBack={handleBack} 
-            userLocation={userLocation} 
-            userLanguage={userLanguage} 
-            onOpenAuth={handleOpenAuth} 
-            user={user}
-            onNavigateToMap={handleNavigateToMap}
-          />
-        );
+        return <PlaceDetailScreen place={selectedPlace} onBack={handleBack} userLocation={userLocation} userLanguage={userLanguage} onOpenAuth={handleOpenAuth} user={user} />;
       default:
         return <HomeScreen onPlaceSelect={handlePlaceSelect} onSearchClick={handleSearchClick} userLocation={userLocation} userLanguage={userLanguage} weatherData={weatherData} onWeatherToggle={handleWeatherToggle} />;
     }

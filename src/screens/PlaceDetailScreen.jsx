@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import StatusBar from "../components/StatusBar";
 import { addStopToItinerary, toggleSavePlace, fetchItinerary } from "../data/api";
 import { calculateDistance, formatDistance } from "../utils/location";
 import { translations } from "../data/translations";
 
-export default function PlaceDetailScreen({ place, onBack, userLocation, userLanguage, onOpenAuth, user, onNavigateToMap }) {
+export default function PlaceDetailScreen({ place, onBack, userLocation, userLanguage, onOpenAuth, user }) {
   const [isSaved, setIsSaved] = useState(place?.isSaved || false);
   const [selectedPhoto, setSelectedPhoto] = useState(place?.image || place?.photos?.[0] || null);
 
@@ -432,11 +429,14 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
         {/* Quick Actions (Directions, Share, Save) */}
         <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
           <div
-            onClick={() => {
-              if (onNavigateToMap) {
-                onNavigateToMap(place);
-              }
-            }}
+            onClick={() =>
+              window.open(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  place.name + " " + place.address + " Ujjain"
+                )}`,
+                "_blank"
+              )
+            }
             style={{
               flex: 1,
               background: "#fff",
@@ -445,12 +445,9 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
               padding: 10,
               textAlign: "center",
               cursor: "pointer",
-              transition: "transform 0.15s ease",
             }}
-            className="hover:scale-105 active:scale-95"
-            title="View on In-App Interactive Map"
           >
-            <div style={{ fontSize: 20 }}>🧭</div>
+            <div style={{ fontSize: 20 }}>🗺️</div>
             <div style={{ fontSize: 11, fontWeight: 600, color: "#1C1412", marginTop: 3 }}>
               {t.directions}
             </div>
@@ -479,9 +476,7 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
               padding: 10,
               textAlign: "center",
               cursor: "pointer",
-              transition: "transform 0.15s ease",
             }}
-            className="hover:scale-105 active:scale-95"
           >
             <div style={{ fontSize: 20 }}>📤</div>
             <div style={{ fontSize: 11, fontWeight: 600, color: "#1C1412", marginTop: 3 }}>
@@ -499,9 +494,7 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
               padding: 10,
               textAlign: "center",
               cursor: "pointer",
-              transition: "transform 0.15s ease",
             }}
-            className="hover:scale-105 active:scale-95"
           >
             <div style={{ fontSize: 20 }}>🔖</div>
             <div
@@ -516,103 +509,6 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
             </div>
           </div>
         </div>
-
-        {/* In-App Interactive Sacred Geography Map */}
-        {place.latitude && place.longitude && (
-          <div style={{ marginTop: 20, marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-main, #1C1412)", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--font-heading)" }}>
-                <span>📍</span>
-                <span>{userLanguage === "Hindi" ? "स्थान एवं पावन मानचित्र" : "Sacred Location & Map"}</span>
-              </div>
-              {dynamicDistance !== null && (
-                <span style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>
-                  {formatDistance(dynamicDistance)} {userLanguage === "Hindi" ? "दूरी" : "away"}
-                </span>
-              )}
-            </div>
-
-            {/* Embedded Leaflet Map */}
-            <div
-              style={{
-                height: 220,
-                borderRadius: 16,
-                overflow: "hidden",
-                border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                position: "relative",
-              }}
-            >
-              <MapContainer
-                center={[Number(place.latitude), Number(place.longitude)]}
-                zoom={15}
-                scrollWheelZoom={false}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker
-                  position={[Number(place.latitude), Number(place.longitude)]}
-                  icon={L.divIcon({
-                    className: "custom-leaflet-marker",
-                    html: `<div style="
-                      width: 38px;
-                      height: 38px;
-                      border-radius: 50%;
-                      background: linear-gradient(135deg, #FF9933 0%, #D4AF37 100%);
-                      border: 3px solid #FFFFFF;
-                      box-shadow: 0 4px 14px rgba(0,0,0,0.45);
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      font-size: 18px;
-                    ">🕉️</div>`,
-                    iconSize: [38, 38],
-                    iconAnchor: [19, 19],
-                    popupAnchor: [0, -19]
-                  })}
-                >
-                  <Popup>
-                    <div style={{ padding: 4 }}>
-                      <div style={{ fontWeight: 700, fontSize: 13, color: "#1C1412" }}>{place.name}</div>
-                      <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>{place.address}</div>
-                    </div>
-                  </Popup>
-                </Marker>
-              </MapContainer>
-
-              {/* Floating button on top of map to open in full Map screen */}
-              <button
-                type="button"
-                onClick={() => onNavigateToMap && onNavigateToMap(place)}
-                style={{
-                  position: "absolute",
-                  bottom: 10,
-                  right: 10,
-                  zIndex: 1000,
-                  background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
-                  color: "var(--cta-text, #0E0E10)",
-                  border: "none",
-                  borderRadius: 20,
-                  padding: "6px 14px",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  boxShadow: "0 3px 10px rgba(0,0,0,0.35)",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5
-                }}
-                className="hover:scale-105 active:scale-95"
-              >
-                <span>🧭</span>
-                <span>{userLanguage === "Hindi" ? "पूरा नक्शा व मार्ग देखें" : "Explore In-App Route"}</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Add to Itinerary CTA */}
         <button
