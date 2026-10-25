@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { PrismaClient } from '@prisma/client';
+import { prisma, isDbAvailable } from '../services/dbHealth';
+import { UJJAIN_PLACES } from '../data/ujjainPlaces';
+import { localDb } from '../services/localDb';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/jwt';
 import { searchOSMPlaces, fetchOSMPlacesByCategory, fetchOSMPlacesInBounds } from '../services/overpassService';
@@ -11,8 +13,6 @@ import {
   fetchGooglePlacesInBounds as fetchGooglePlacesBounds 
 } from '../services/googleMapsService';
 import { getCachedData, setCachedData, invalidateCache } from '../services/cacheService';
-
-const prisma = new PrismaClient();
 
 const getOptionalUserId = (req: Request): number | null => {
   const authHeader = req.headers.authorization;
@@ -28,6 +28,8 @@ const getOptionalUserId = (req: Request): number | null => {
 
 const saveDiscoveredPlaces = async (discoveredPlaces: any[]): Promise<any[]> => {
   if (discoveredPlaces.length === 0) return [];
+  const dbOk = await isDbAvailable();
+  if (!dbOk) return discoveredPlaces;
   
   const saved: any[] = [];
   for (const p of discoveredPlaces) {
@@ -64,6 +66,47 @@ export const getAllPlaces = async (req: Request, res: Response) => {
   try {
     const { category, q, isSaved, isDiscovered, bbox, live } = req.query;
     const currentUserId = getOptionalUserId(req);
+
+    // Fast-path: Check DB availability without hanging
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      let filtered = [...UJJAIN_PLACES];
+      if (category && category !== 'All' && !q) {
+        filtered = filtered.filter(p => p.category.toLowerCase() === String(category).toLowerCase());
+      }
+      if (q) {
+        const qStr = String(q).trim().toLowerCase();
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(qStr) ||
+          p.description.toLowerCase().includes(qStr) ||
+          p.category.toLowerCase().includes(qStr) ||
+          p.address.toLowerCase().includes(qStr) ||
+          (p.name_mr && p.name_mr.includes(String(q))) ||
+          (p.description_mr && p.description_mr.includes(String(q))) ||
+          (p.tag && p.tag.toLowerCase().includes(qStr))
+        );
+      }
+      if (bbox) {
+        const parts = String(bbox).split(',').map(Number);
+        if (parts.length === 4 && parts.every((num) => !isNaN(num))) {
+          const [south, west, north, east] = parts;
+          filtered = filtered.filter(p =>
+            p.latitude >= Math.min(south, north) && p.latitude <= Math.max(south, north) &&
+            p.longitude >= Math.min(west, east) && p.longitude <= Math.max(west, east)
+          );
+        }
+      }
+      if (isSaved === 'true') {
+        if (!currentUserId) return res.json([]);
+        const savedIds = new Set(localDb.getUserSavedPlaceIds(currentUserId));
+        return res.json(filtered.filter(p => savedIds.has(p.id)).map(p => ({ ...p, isSaved: true })));
+      }
+      if (currentUserId) {
+        const savedIds = new Set(localDb.getUserSavedPlaceIds(currentUserId));
+        filtered = filtered.map(p => ({ ...p, isSaved: savedIds.has(p.id) }));
+      }
+      return res.json(filtered);
+    }
 
     // 1. User-scoped bookmarks request: Never share or contaminate global catalog cache
     if (isSaved === 'true') {
@@ -253,8 +296,13 @@ export const getAllPlaces = async (req: Request, res: Response) => {
 
     res.json(decoratedPlaces);
   } catch (error) {
-    console.error('Error in getAllPlaces:', error);
-    res.status(500).json({ error: 'Failed to fetch places' });
+    console.warn('[Places] Falling back to in-memory places:', error);
+    let fallback = [...UJJAIN_PLACES];
+    const cat = req.query.category;
+    if (cat && cat !== 'All') {
+      fallback = fallback.filter(p => p.category.toLowerCase() === String(cat).toLowerCase());
+    }
+    return res.json(fallback);
   }
 };
 
@@ -266,9 +314,19 @@ export const getPlaceById = async (req: Request, res: Response) => {
 
     let place = await getCachedData<any>(cacheKey);
     if (!place) {
-      place = await prisma.place.findUnique({
-        where: { id: Number(id) }
-      });
+      const dbOk = await isDbAvailable();
+      if (dbOk) {
+        try {
+          place = await prisma.place.findUnique({
+            where: { id: Number(id) }
+          });
+        } catch {
+          // fall through
+        }
+      }
+      if (!place) {
+        place = UJJAIN_PLACES.find(p => p.id === Number(id));
+      }
       if (!place) return res.status(404).json({ error: 'Place not found' });
       await setCachedData(cacheKey, place, 3600);
     }
@@ -305,6 +363,14 @@ export const toggleSavePlace = async (req: AuthRequest, res: Response) => {
     const { isSaved } = req.body;
     const userId = req.user.id;
     const placeId = Number(id);
+
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      const place = UJJAIN_PLACES.find((p) => p.id === placeId);
+      if (!place) return res.status(404).json({ error: 'Place not found' });
+      const saved = localDb.toggleSavePlace(userId, placeId, Boolean(isSaved));
+      return res.json({ ...place, isSaved: saved });
+    }
 
     const place = await prisma.place.findUnique({
       where: { id: placeId }

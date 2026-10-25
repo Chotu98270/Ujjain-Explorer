@@ -17,9 +17,10 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
         display: "flex",
         gap: 12,
         padding: "12px 16px",
-        borderBottom: "1px solid #EDE8DF",
-        background: "#fff",
+        borderBottom: "1px solid var(--border-subtle, #2E2E3C)",
+        background: "var(--bg-card, #22222B)",
         cursor: "pointer",
+        transition: "background 0.15s ease",
       }}
     >
       {/* Thumbnail */}
@@ -29,20 +30,21 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
           height: 64,
           borderRadius: 12,
           flexShrink: 0,
-          background: place.bgColor || "#FDF2EC",
+          background: place.bgColor || "var(--bg-elevated, #2A2A36)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: 28,
           overflow: "hidden",
           position: "relative",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
         }}
       >
         {place.image ? (
           <img
             src={place.image}
             alt={place.name}
+            loading="lazy"
             style={{
               width: "100%",
               height: "100%",
@@ -71,13 +73,13 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
 
       {/* Body */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#1C1412" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
           {["Hindi", "Marathi", "Sanskrit", "Gujarati"].includes(userLanguage) && place.name_mr ? place.name_mr : place.name}
         </div>
         <div
           style={{
             fontSize: 11,
-            color: "#6B5B52",
+            color: "var(--text-sub, #A1A1AF)",
             marginTop: 2,
             lineHeight: 1.4,
             overflow: "hidden",
@@ -89,15 +91,15 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
           {(userLanguage === "Marathi" || userLanguage === "Hindi") && place.description_mr ? place.description_mr : place.description}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, color: "#B87318" }}>
-            ⭐ {place.rating?.toFixed(1) || "4.0"}
+          <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 700, color: "var(--accent-secondary, #D4AF37)" }}>
+            ⭐ {place.rating?.toFixed(1) || "4.8"}
           </div>
           <div
             style={{
               fontSize: 10,
-              color: "#6B5B52",
+              color: "var(--text-muted, #888)",
               padding: "2px 7px",
-              background: "#EDE8DF",
+              background: "var(--bg-elevated, #2A2A36)",
               borderRadius: 8,
             }}
           >

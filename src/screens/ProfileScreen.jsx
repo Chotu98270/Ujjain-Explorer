@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceListItem from "../components/PlaceListItem";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import { fetchPlaces, fetchUserStats } from "../data/api";
 import { colors } from "../data/tokens";
 import { translations } from "../data/translations";
@@ -473,6 +474,26 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             )}
           </div>
         )}
+        {/* Visual Appearance & Theme Settings */}
+        <div style={{ 
+          marginTop: 20, 
+          padding: "16px 14px", 
+          background: "var(--bg-card, #22222B)", 
+          borderRadius: 16, 
+          border: "1px solid var(--border-color, rgba(212,175,55,0.25))",
+          boxShadow: "var(--card-shadow, 0 4px 14px rgba(0,0,0,0.15))",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
+              {userLanguage === "Hindi" ? "🎨 दृश्य थीम (Sacred Themes)" : "🎨 Visual Appearance & Theme"}
+            </div>
+            <div style={{ fontSize: 10, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>
+              {userLanguage === "Hindi" ? "३ सांस्कृतिक शैलियाँ" : "3 Cultural Styles"}
+            </div>
+          </div>
+          <ThemeSwitcher variant="full" userLanguage={userLanguage} />
+        </div>
+
         {/* Version & Contributor Acknowledgements Banner */}
         <div style={{ 
           marginTop: 20, 

@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import HomeScreen from "./screens/HomeScreen";
 import BottomNav from "./components/BottomNav";
 import AuthScreen from "./screens/AuthScreen";
+import { ThemeProvider } from "./context/ThemeContext";
 import { useUserLocation } from "./hooks/useUserLocation";
 import { logoutUser, fetchWeather, toggleWeather } from "./data/api";
 
@@ -11,7 +12,7 @@ const PlanScreen = lazy(() => import("./screens/PlanScreen"));
 const ProfileScreen = lazy(() => import("./screens/ProfileScreen"));
 const PlaceDetailScreen = lazy(() => import("./screens/PlaceDetailScreen"));
 
-export default function App() {
+function MainApp() {
   const [activeTab, setActiveTab] = useState("home");
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [exploreParams, setExploreParams] = useState({});
@@ -105,29 +106,36 @@ export default function App() {
   };
 
   return (
-    <div className="flex justify-center items-stretch sm:items-start min-h-screen bg-white sm:bg-gray-100 sm:py-8">
+    <div className="flex justify-center items-stretch sm:items-start min-h-screen bg-black sm:bg-[#08080A] sm:py-6 transition-colors duration-300">
       <div
-        className="relative bg-[#FBF8F3] overflow-hidden flex flex-col w-full h-[100dvh] sm:h-auto sm:w-[375px] sm:min-h-[812px] sm:rounded-[40px] sm:border-2 sm:border-[#D1CBC0]"
+        className="relative overflow-hidden flex flex-col w-full h-[100dvh] sm:h-auto sm:w-[390px] sm:min-h-[820px] sm:rounded-[44px] sm:border-2 transition-all duration-300"
         style={{
-          fontFamily: "'Inter', sans-serif",
+          background: "var(--bg-primary, #0E0E10)",
+          borderColor: "var(--border-color, rgba(212,175,55,0.3))",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.8)",
+          fontFamily: "var(--font-body, 'Inter', sans-serif)",
         }}
       >
-        {/* Notch - hidden on mobile device screens */}
+        {/* Decorative Notch */}
         <div
           className="mx-auto z-10 hidden sm:block"
           style={{
-            width: 126,
-            height: 28,
-            background: "#1a1a1a",
-            borderRadius: "0 0 18px 18px",
+            width: 130,
+            height: 26,
+            background: "#050505",
+            borderRadius: "0 0 16px 16px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderTop: "none"
           }}
         />
 
-        {/* Screen content */}
-        <div className="flex-1 relative overflow-hidden">
+        {/* Screen Content Container */}
+        <div className="flex-1 relative overflow-hidden" style={{ background: "var(--bg-primary, #0E0E10)" }}>
           <Suspense fallback={
-            <div style={{ background: "#FAF6EE", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ color: "#D9531E", fontWeight: 600, fontSize: 13 }}>Loading Ujjain Explorer...</div>
+            <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 700, fontSize: 13 }}>
+                🕉️ Loading Ujjain Explorer...
+              </div>
             </div>
           }>
             {renderScreen()}
@@ -135,7 +143,7 @@ export default function App() {
 
           {/* Auth Modal Overlay */}
           {isAuthModalOpen && (
-            <div className="absolute inset-0 z-50 bg-[#FBF8F3]">
+            <div className="absolute inset-0 z-50" style={{ background: "var(--bg-surface, #18181D)" }}>
               <AuthScreen
                 onAuthSuccess={handleAuthSuccess}
                 onClose={() => setIsAuthModalOpen(false)}
@@ -152,5 +160,13 @@ export default function App() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }

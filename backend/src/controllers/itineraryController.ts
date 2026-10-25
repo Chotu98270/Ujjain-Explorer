@@ -1,15 +1,24 @@
 import { Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma, isDbAvailable } from '../services/dbHealth';
+import { UJJAIN_ITINERARY } from '../data/ujjainPlaces';
+import { localDb } from '../services/localDb';
 import axios from 'axios';
 import { AuthRequest } from '../middleware/auth';
 import { isGoogleMapsEnabled, optimizeWaypointsWithGoogle } from '../services/googleMapsService';
-
-const prisma = new PrismaClient();
 
 export const getItinerary = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      const userItin = localDb.getUserItinerary(req.user.id);
+      if (userItin && userItin.length > 0) {
+        return res.json(userItin);
+      }
+      return res.json(UJJAIN_ITINERARY);
     }
 
     const userId = req.user.id;
@@ -96,8 +105,8 @@ export const getItinerary = async (req: AuthRequest, res: Response) => {
 
     res.json(itinerary);
   } catch (error) {
-    console.error("Failed to fetch itinerary:", error);
-    res.status(500).json({ error: 'Failed to fetch itinerary' });
+    console.warn("[Itinerary] Falling back to default itinerary:", error);
+    res.json(UJJAIN_ITINERARY);
   }
 };
 
@@ -110,6 +119,12 @@ export const toggleStopStatus = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { done } = req.body;
     const userId = req.user.id;
+
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      const updated = localDb.updateStopStatus(userId, Number(id), Boolean(done));
+      return res.json(updated || { id: Number(id), done: Boolean(done) });
+    }
 
     // Enforce ownership: make sure the stop belongs to an itinerary day owned by the user
     const stop = await prisma.itineraryStop.findUnique({
@@ -152,6 +167,20 @@ export const addStopToItinerary = async (req: AuthRequest, res: Response) => {
 
     const { itineraryDayId, name, name_mr, time, desc, desc_mr, dotColor, tags } = req.body;
     const userId = req.user.id;
+
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      const newStop = localDb.addStop(userId, Number(itineraryDayId) || null, {
+        name,
+        name_mr,
+        time,
+        desc,
+        desc_mr,
+        dotColor,
+        tags,
+      });
+      return res.json(newStop);
+    }
 
     let targetDayId = Number(itineraryDayId);
     let day = targetDayId ? await prisma.itineraryDay.findUnique({ where: { id: targetDayId } }) : null;
@@ -196,6 +225,12 @@ export const deleteStopFromItinerary = async (req: AuthRequest, res: Response) =
 
     const { id } = req.params;
     const userId = req.user.id;
+
+    const dbOk = await isDbAvailable();
+    if (!dbOk) {
+      localDb.deleteStop(userId, Number(id));
+      return res.json({ success: true, message: "Stop deleted successfully" });
+    }
 
     // Ensure ownership of the stop
     const stop = await prisma.itineraryStop.findUnique({

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { GoogleMap, useJsApiLoader, DirectionsRenderer, InfoWindowF, OverlayViewF, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, InfoWindowF, MarkerF } from "@react-google-maps/api";
 import { categoryColors } from "../data/tokens";
-import { translations } from "../data/translations";
 
 const GOOGLE_LIBRARIES = ["places", "geometry"];
 
@@ -13,6 +12,40 @@ const ujjainMapStyles = [
   { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#fed7aa" }] },
   { featureType: "poi.place_of_worship", elementType: "labels.text.fill", stylers: [{ color: "#9e2a2b" }] }
 ];
+
+// In-memory cache for generated SVG icons (avoids SVG regeneration on map pans)
+const markerIconCache = new Map();
+
+function getMarkerIcon(color, emoji, stopNumber, isSelected) {
+  const cacheKey = `${color}_${emoji}_${stopNumber}_${isSelected}`;
+  if (markerIconCache.has(cacheKey)) {
+    return markerIconCache.get(cacheKey);
+  }
+
+  const filterId = `shadow_${cacheKey.replace(/[^a-zA-Z0-9]/g, "_")}`;
+  const badge = stopNumber !== null ? `
+    <circle cx="28" cy="8" r="7.5" fill="#1B4965" stroke="#FFFFFF" stroke-width="1.5"/>
+    <text x="28" y="11" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">${stopNumber}</text>
+  ` : "";
+
+  const stroke = isSelected ? `stroke="#FFFFFF" stroke-width="2.5"` : `stroke="#FFFFFF" stroke-width="1.2"`;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">
+    <defs>
+      <filter id="${filterId}" x="-20%" y="-10%" width="140%" height="130%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.35"/>
+      </filter>
+    </defs>
+    <path d="M18 43 C18 43 32 27 32 17 A14 14 0 0 0 4 17 C4 27 18 43 18 43 Z" fill="${color}" ${stroke} filter="url(#${filterId})"/>
+    <circle cx="18" cy="17" r="10.5" fill="#FFFFFF"/>
+    <text x="18" y="22" text-anchor="middle" font-size="12" font-family="'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif">${emoji || "📍"}</text>
+    ${badge}
+  </svg>`;
+
+  const iconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  markerIconCache.set(cacheKey, iconUrl);
+  return iconUrl;
+}
 
 export default memo(function GoogleMapView({
   apiKey,
@@ -38,7 +71,6 @@ export default memo(function GoogleMapView({
 
   const [activeMarker, setActiveMarker] = useState(null);
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [googlePhotos, setGooglePhotos] = useState({});
   const mapRef = useRef(null);
 
   const defaultCenter = { lat: 23.1828, lng: 75.7682 }; // Shri Mahakaleshwar Jyotirlinga, Ujjain
@@ -50,38 +82,6 @@ export default memo(function GoogleMapView({
   const onUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
-
-  // Fetch official Google Maps Place Photos using PlacesService
-  useEffect(() => {
-    if (!isLoaded || !mapRef.current || !window.google?.maps?.places || places.length === 0) return;
-
-    try {
-      const placesService = new window.google.maps.places.PlacesService(mapRef.current);
-
-      places.slice(0, 12).forEach((place) => {
-        if (!place.name || googlePhotos[place.name]) return;
-
-        const request = {
-          query: `${place.name} Ujjain`,
-          fields: ["name", "photos", "place_id"]
-        };
-
-        placesService.findPlaceFromQuery(request, (results, status) => {
-          if (
-            status === window.google.maps.places.PlacesServiceStatus.OK &&
-            results?.[0]?.photos?.length > 0
-          ) {
-            const photoUrl = results[0].photos[0].getUrl({ maxWidth: 600, maxHeight: 600 });
-            if (photoUrl) {
-              setGooglePhotos((prev) => ({ ...prev, [place.name]: photoUrl }));
-            }
-          }
-        });
-      });
-    } catch (err) {
-      console.warn("[Google Places Photo] Service fetch:", err.message);
-    }
-  }, [isLoaded, places]);
 
   // Update center when selectedPlace changes
   useEffect(() => {
@@ -214,19 +214,24 @@ export default memo(function GoogleMapView({
         styles: ujjainMapStyles
       }}
     >
-      {/* User Location Pulse Marker */}
+      {/* Native GPU-Accelerated User Location Marker */}
       {userLocation?.latitude && userLocation?.longitude && (
-        <OverlayViewF
-          position={{ lat: userLocation.latitude, lng: userLocation.longitude }}
-          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-        >
-          <div style={{ transform: "translate(-50%, -50%)", pointerEvents: "none" }}>
-            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#1B4965", border: "2.5px solid #fff", boxShadow: "0 0 10px rgba(27,73,101,0.7)" }} />
-          </div>
-        </OverlayViewF>
+        <MarkerF
+          position={{ lat: Number(userLocation.latitude), lng: Number(userLocation.longitude) }}
+          title="Your Location"
+          zIndex={1000}
+          icon={{
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#1B4965",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2.5,
+          }}
+        />
       )}
 
-      {/* Places Markers with Circular Photo Icons & Numbered Badges */}
+      {/* GPU-Accelerated Native Google Maps Markers */}
       {places
         .filter((p) => p.latitude && p.longitude)
         .map((place) => {
@@ -235,113 +240,26 @@ export default memo(function GoogleMapView({
           );
           const stopNumber = stopIndex !== -1 ? stopIndex + 1 : null;
           const catStyle = categoryColors[place.category] || categoryColors.default;
-          const borderColor = catStyle.color || "#D9531E";
+          const markerColor = catStyle.color || "#D9531E";
           const isSelected = activeMarker?.name?.toLowerCase() === place.name?.toLowerCase();
-          const markerPhoto = googlePhotos[place.name] || place.image;
+          const iconUrl = getMarkerIcon(markerColor, place.emoji, stopNumber, isSelected);
 
           return (
-            <OverlayViewF
+            <MarkerF
               key={place.id || place.osmId || place.name}
               position={{ lat: Number(place.latitude), lng: Number(place.longitude) }}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            >
-              <div
-                onClick={() => {
-                  setActiveMarker(place);
-                  if (onSelectPlace) onSelectPlace(place);
-                }}
-                title={place.name}
-                style={{
-                  position: "relative",
-                  transform: isSelected ? "translate(-50%, -100%) scale(1.15)" : "translate(-50%, -100%)",
-                  cursor: "pointer",
-                  userSelect: "none",
-                  transition: "transform 0.15s ease",
-                  filter: isSelected ? "drop-shadow(0 6px 12px rgba(0,0,0,0.4))" : "drop-shadow(0 3px 6px rgba(0,0,0,0.25))",
-                }}
-              >
-                {/* Circular Photo Avatar */}
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "50%",
-                    background: "#FAF6EE",
-                    border: `3px solid ${borderColor}`,
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    position: "relative",
-                  }}
-                >
-                  {markerPhoto ? (
-                    <img
-                      src={markerPhoto}
-                      alt={place.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const span = e.currentTarget.nextElementSibling;
-                        if (span) span.style.display = "flex";
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    style={{
-                      display: markerPhoto ? "none" : "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 18,
-                    }}
-                  >
-                    {place.emoji || "📍"}
-                  </span>
-                </div>
-
-                {/* Bottom Pointer Caret */}
-                <div
-                  style={{
-                    width: 0,
-                    height: 0,
-                    borderLeft: "6px solid transparent",
-                    borderRight: "6px solid transparent",
-                    borderTop: `7px solid ${borderColor}`,
-                    margin: "-1px auto 0 auto",
-                  }}
-                />
-
-                {/* Itinerary Number Badge */}
-                {stopNumber !== null && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -4,
-                      right: -4,
-                      background: "#1B4965",
-                      color: "#ffffff",
-                      width: 20,
-                      height: 20,
-                      borderRadius: "50%",
-                      border: "2px solid #ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    {stopNumber}
-                  </div>
-                )}
-              </div>
-            </OverlayViewF>
+              title={place.name}
+              zIndex={isSelected ? 999 : (stopNumber !== null ? 500 + stopNumber : 20)}
+              onClick={() => {
+                setActiveMarker(place);
+                if (onSelectPlace) onSelectPlace(place);
+              }}
+              icon={{
+                url: iconUrl,
+                scaledSize: isSelected ? new window.google.maps.Size(42, 54) : new window.google.maps.Size(36, 46),
+                anchor: isSelected ? new window.google.maps.Point(21, 52) : new window.google.maps.Point(18, 44),
+              }}
+            />
           );
         })}
 
@@ -350,10 +268,10 @@ export default memo(function GoogleMapView({
         <InfoWindowF
           position={{ lat: Number(activeMarker.latitude), lng: Number(activeMarker.longitude) }}
           onCloseClick={() => setActiveMarker(null)}
-          options={{ pixelOffset: new window.google.maps.Size(0, -48) }}
+          options={{ pixelOffset: new window.google.maps.Size(0, -42) }}
         >
           <div style={{ width: 190, padding: 2, fontFamily: "'Inter', sans-serif" }}>
-            {(googlePhotos[activeMarker.name] || activeMarker.image) && (
+            {activeMarker.image && (
               <div
                 style={{
                   width: "100%",
@@ -365,9 +283,13 @@ export default memo(function GoogleMapView({
                 }}
               >
                 <img
-                  src={googlePhotos[activeMarker.name] || activeMarker.image}
+                  src={activeMarker.image}
                   alt={activeMarker.name}
+                  loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => {
+                    e.currentTarget.parentElement.style.display = "none";
+                  }}
                 />
               </div>
             )}

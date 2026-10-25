@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import StatusBar from "../components/StatusBar";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import { tagStyles, colors } from "../data/tokens";
 import { fetchItinerary, deleteStopFromItinerary, fetchPlaces, addStopToItinerary, optimizeItinerary, generateItinerary, adaptItineraryForWeather } from "../data/api";
 import { translations } from "../data/translations";
@@ -476,7 +477,7 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
   ];
 
   return (
-    <div style={{ background: "#FBF8F3", height: "100%", overflowY: "auto", paddingBottom: 80, position: "relative" }}>
+    <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", overflowY: "auto", paddingBottom: 80, position: "relative", transition: "background 0.3s ease" }}>
       <StatusBar light />
       <style>{`
         .custom-modal-fade {
@@ -501,19 +502,20 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
         }
       `}</style>
 
-      {/* Hero / Header */}
+      {/* Themed Hero / Header with Flagship Switcher */}
       <div
         style={{
-          background: "#8B3A2A",
-          padding: "20px 20px 28px",
+          background: "var(--hero-gradient, linear-gradient(135deg, #1C0F08 0%, #0E0E10 100%))",
+          borderBottom: "1px solid var(--hero-border, rgba(255,153,51,0.25))",
+          padding: "16px 20px 24px",
           position: "relative",
-          overflow: "hidden",
+          zIndex: 30,
         }}
       >
-        <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 8 }}>
-              <span>{t.myPlan}</span>
+        <div style={{ position: "relative", zIndex: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-heading)" }}>
+              <span>{t.myPlan} 📜</span>
               <span
                 style={{
                   fontSize: 10,
@@ -531,12 +533,15 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
                 {weatherData?.weather === "Sunny" ? "☀️" : "🌧️"} {weatherData?.temp}°C
               </span>
             </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 3 }}>
+            <ThemeSwitcher variant="header" userLanguage={userLanguage} />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>
               {day.stops.length} {t.stops} · Ujjain, MP
             </div>
-          </div>
-          <button
-            onClick={() => {
+            <button
+              onClick={() => {
               if (navigator.share) {
                 navigator.share({
                   title: t.myPlan,
@@ -562,6 +567,7 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
           </button>
         </div>
       </div>
+    </div>
 
       {/* Day selector */}
       <div style={{ background: "#8B3A2A", padding: "0 16px 16px", display: "flex", gap: 8, overflowX: "auto" }}>

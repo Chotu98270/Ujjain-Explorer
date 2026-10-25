@@ -79,7 +79,7 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
     : place.image ? [place.image] : [];
 
   return (
-    <div style={{ background: "#FAF6EE", height: "100%", overflowY: "auto" }}>
+    <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", overflowY: "auto", transition: "background 0.3s ease" }}>
       <StatusBar light />
 
       {/* Hero Banner with Photo */}
@@ -253,23 +253,24 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
         {/* Title row */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#1C1412" }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
               {["Hindi", "Marathi", "Sanskrit", "Gujarati"].includes(userLanguage) && place.name_mr
                 ? place.name_mr
                 : place.name}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#6B5B52", marginTop: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-sub, #A1A1AF)", marginTop: 4 }}>
               📍 {place.address} · {formatDistance(dynamicDistance)}
             </div>
           </div>
           <div
             style={{
-              background: "#FDF3E0",
-              color: "#B87318",
+              background: "rgba(255,153,51,0.18)",
+              color: "var(--accent-primary, #FF9933)",
+              border: "1px solid rgba(255,153,51,0.3)",
               padding: "5px 10px",
               borderRadius: 10,
               fontSize: 12,
-              fontWeight: 600,
+              fontWeight: 700,
               flexShrink: 0,
             }}
           >
@@ -287,15 +288,15 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
             <div
               key={s.lbl}
               style={{
-                background: "#fff",
-                border: "1px solid #EDE8DF",
-                borderRadius: 10,
+                background: "var(--bg-card, #22222B)",
+                border: "1px solid var(--border-color, rgba(212,175,55,0.25))",
+                borderRadius: 12,
                 padding: "10px 8px",
                 textAlign: "center",
               }}
             >
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1C1412" }}>{s.val}</div>
-              <div style={{ fontSize: 10, color: "#6B5B52", marginTop: 2 }}>{s.lbl}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{s.val}</div>
+              <div style={{ fontSize: 10, color: "var(--text-sub, #A1A1AF)", marginTop: 2 }}>{s.lbl}</div>
             </div>
           ))}
         </div>
@@ -515,8 +516,8 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
           disabled={isAdding}
           style={{
             width: "100%",
-            background: isAdded ? "#15803D" : isAdding ? "#1B4965" : "#D9531E",
-            color: "#fff",
+            background: isAdded ? "#15803D" : isAdding ? "#1B4965" : "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
+            color: isAdded || isAdding ? "#FFFFFF" : "var(--cta-text, #0E0E10)",
             border: "none",
             borderRadius: 14,
             padding: 14,
@@ -529,7 +530,7 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
-            boxShadow: "0 4px 12px rgba(217,83,30,0.3)",
+            boxShadow: "var(--card-shadow, 0 4px 16px rgba(0,0,0,0.4))",
             transition: "all 0.2s ease",
           }}
         >

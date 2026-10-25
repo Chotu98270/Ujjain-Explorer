@@ -1,15 +1,25 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma, isDbAvailable } from '../services/dbHealth';
+import { UJJAIN_EVENTS } from '../data/ujjainPlaces';
 
 export const getAllEvents = async (req: Request, res: Response) => {
   try {
-    const events = await prisma.event.findMany({
-      orderBy: { id: 'asc' }
-    });
-    res.json(events);
+    const dbOk = await isDbAvailable();
+    if (dbOk) {
+      try {
+        const events = await prisma.event.findMany({
+          orderBy: { id: 'asc' }
+        });
+        if (events && events.length > 0) {
+          return res.json(events);
+        }
+      } catch (dbErr) {
+        // Fall back to in-memory events
+      }
+    }
+    // High-speed fallback
+    return res.json(UJJAIN_EVENTS);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch events' });
+    return res.json(UJJAIN_EVENTS);
   }
 };

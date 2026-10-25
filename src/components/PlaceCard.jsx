@@ -13,37 +13,72 @@ const PlaceCard = memo(function PlaceCard({ place, onClick, userLocation, userLa
     <div
       onClick={() => onClick(place)}
       style={{
-        width: 150,
+        width: 156,
         flexShrink: 0,
         borderRadius: 14,
         overflow: "hidden",
-        border: "1px solid #EDE8DF",
-        background: "#fff",
+        border: "1px solid var(--border-color, #EDE8DF)",
+        background: "var(--bg-card, #fff)",
+        boxShadow: "var(--card-shadow, 0 4px 14px rgba(0,0,0,0.06))",
         cursor: "pointer",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
       }}
     >
       {/* Thumbnail */}
       <div
         style={{
           width: "100%",
-          height: 90,
-          background: place.bgColor,
+          height: 92,
+          background: place.bgColor || "var(--bg-elevated, #2A2A36)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: 36,
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        {place.emoji}
+        {place.image ? (
+          <img
+            src={place.image}
+            alt={place.name}
+            loading="lazy"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const s = e.currentTarget.nextElementSibling;
+              if (s) s.style.display = "flex";
+            }}
+          />
+        ) : null}
+        <span
+          style={{
+            display: place.image ? "none" : "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 32,
+          }}
+        >
+          {place.emoji || "📍"}
+        </span>
       </div>
 
       {/* Info */}
       <div style={{ padding: "8px 10px 10px" }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#1C1412" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "var(--text-main, #1C1412)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           {["Hindi", "Marathi", "Sanskrit", "Gujarati"].includes(userLanguage) && place.name_mr ? place.name_mr : place.name}
         </div>
-        <div style={{ fontSize: 11, color: "#6B5B52", marginTop: 2 }}>
-          ⭐ {place.rating?.toFixed(1) || "4.0"} · {formatDistance(dynamicDistance)}
+        <div style={{ fontSize: 11, color: "var(--text-sub, #6B5B52)", marginTop: 2 }}>
+          ⭐ {place.rating?.toFixed(1) || "4.8"} · {formatDistance(dynamicDistance)}
         </div>
         <div
           style={{

@@ -7,81 +7,107 @@ const authTranslations = {
     login: "Login",
     register: "Register",
     name: "Full Name",
+    phone: "Mobile Number",
     email: "Email Address",
-    password: "Password",
+    emailOptional: "Email (Optional)",
+    identifier: "Mobile Number or Email",
+    password: "Password / 4-Digit PIN",
     welcomeBack: "Welcome Back",
-    getStarted: "Create Account",
+    getStarted: "Create Pilgrim Account",
     welcomeSubtitle: "Explore the eternal city of Mahakal & Shipra 🕉️",
     dontHaveAccount: "Don't have an account?",
     alreadyHaveAccount: "Already have an account?",
     errorOccurred: "An error occurred. Please try again.",
     puneExplorer: "Ujjain Explorer",
-    enterName: "Enter full name",
-    enterEmail: "Enter email",
-    enterPassword: "Enter password"
+    enterName: "Enter your full name",
+    enterPhone: "10-digit mobile number",
+    enterEmail: "Enter email (optional)",
+    enterIdentifier: "Enter 10-digit mobile number or email",
+    enterPassword: "Enter password or PIN",
+    guestMode: "Continue as Guest",
   },
   Marathi: {
     login: "लॉगिन",
     register: "नोंदणी",
     name: "पूर्ण नाव",
+    phone: "मोबाईल नंबर",
     email: "ईमेल पत्ता",
-    password: "पासवर्ड",
+    emailOptional: "ईमेल (पर्यायी)",
+    identifier: "मोबाईल नंबर किंवा ईमेल",
+    password: "पासवर्ड / ४-अंकी पिन",
     welcomeBack: "पुन्हा आपले स्वागत आहे",
-    getStarted: "खाते तयार करा",
+    getStarted: "यात्री खाते तयार करा",
     welcomeSubtitle: "महाकाल नगरी आणि अवन्तिका दर्शनाचा अनुभव घ्या 🕉️",
     dontHaveAccount: "खाते नाही का?",
     alreadyHaveAccount: "आधीच खाते आहे का?",
     errorOccurred: "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.",
     puneExplorer: "उज्जैन एक्सप्लोरर",
-    enterName: "पूर्ण नाव प्रविष्ट करा",
-    enterEmail: "ईमेल प्रविष्ट करा",
-    enterPassword: "पासवर्ड प्रविष्ट करा"
+    enterName: "आपले पूर्ण नाव प्रविष्ट करा",
+    enterPhone: "१० अंकी मोबाईल नंबर",
+    enterEmail: "ईमेल प्रविष्ट करा (पर्यायी)",
+    enterIdentifier: "१० अंकी मोबाईल किंवा ईमेल प्रविष्ट करा",
+    enterPassword: "पासवर्ड किंवा पिन प्रविष्ट करा",
+    guestMode: "अतिथी म्हणून पुढे जा",
   },
   Hindi: {
     login: "लॉगिन",
     register: "रजिस्टर",
     name: "पूरा नाम",
+    phone: "मोबाइल नंबर",
     email: "ईमेल पता",
-    password: "पासवर्ड",
+    emailOptional: "ईमेल (वैकल्पिक)",
+    identifier: "मोबाइल नंबर या ईमेल",
+    password: "पासवर्ड / ४-अंकीय पिन",
     welcomeBack: "स्वागत है",
-    getStarted: "खाता बनाएँ",
+    getStarted: "यात्री खाता बनाएँ",
     welcomeSubtitle: "महाकाल की पावन नगरी अवन्तिका दर्शन 🕉️",
     dontHaveAccount: "खाता नहीं है?",
     alreadyHaveAccount: "पहले से खाता है?",
     errorOccurred: "कोई त्रुटि हुई। कृपया पुन: प्रयास करें।",
     puneExplorer: "उज्जैन एक्सप्लोरर",
-    enterName: "पूरा नाम दर्ज करें",
-    enterEmail: "ईमेल दर्ज करें",
-    enterPassword: "पासवर्ड दर्ज करें"
+    enterName: "अपना पूरा नाम दर्ज करें",
+    enterPhone: "१० अंकों का मोबाइल नंबर",
+    enterEmail: "ईमेल दर्ज करें (वैकल्पिक)",
+    enterIdentifier: "१० अंकों का मोबाइल या ईमेल दर्ज करें",
+    enterPassword: "पासवर्ड या पिन दर्ज करें",
+    guestMode: "अतिथि के रूप में जारी रखें",
   },
   Gujarati: {
     login: "લોગિન",
     register: "રજીસ્ટર",
     name: "પૂરું નામ",
+    phone: "મોબાઇલ નંબર",
     email: "ઇમેઇલ સરનામું",
-    password: "પાસવર્ડ",
+    emailOptional: "ઇમેઇલ (વૈકલ્પિક)",
+    identifier: "મોબાઇલ નંબર અથવા ઇમેઇલ",
+    password: "પાસવર્ડ / ૪-અંકનો પિન",
     welcomeBack: "સ્વાગત છે",
-    getStarted: "ખાતું બનાવો",
+    getStarted: "યાત્રી ખાતું બનાવો",
     welcomeSubtitle: "મહાકાલ નગરી અને અવન્તિકા દર્શન 🕉️",
     dontHaveAccount: "ખાતું નથી?",
     alreadyHaveAccount: "પહેલાથી જ ખાતું છે?",
     errorOccurred: "કોઈ ભૂલ થઈ. કૃપા કરીને ફરી પ્રયાસ કરો.",
     puneExplorer: "ઉજ્જૈન એક્સપ્લોરર",
-    enterName: "પૂરું નામ દાખલ કરો",
-    enterEmail: "ઇમેઇલ દાખલ કરો",
-    enterPassword: "પાસવર્ડ દાખલ કરો"
+    enterName: "તમારું પૂરું નામ દાખલ કરો",
+    enterPhone: "૧૦ અંકનો મોબાઇલ નંબર",
+    enterEmail: "ઇમેઇલ દાખલ કરો (વૈકલ્પિક)",
+    enterIdentifier: "૧૦ અંકનો મોબાઇલ અથવા ઇમેઇલ દાખલ કરો",
+    enterPassword: "પાસવર્ડ અથવા પિન દાખલ કરો",
+    guestMode: "અતિથિ તરીકે ચાલુ રાખો",
   }
 };
 
-export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguage, onClose }) {
+export default function AuthScreen({ onAuthSuccess, userLanguage = "Hindi", setUserLanguage, onClose }) {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const t = authTranslations[userLanguage] || authTranslations.English;
+  const t = authTranslations[userLanguage] || authTranslations.Hindi;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -90,24 +116,78 @@ export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguag
 
     try {
       if (isLogin) {
-        const data = await loginUser(email, password);
-        onAuthSuccess(data.user);
-      } else {
-        if (!name) {
-          const errorMsg = 
-            userLanguage === "Marathi" ? "कृपया तुमचे नाव प्रविष्ट करा" :
-            userLanguage === "Hindi" ? "कृपया अपना नाम दर्ज करें" :
-            userLanguage === "Gujarati" ? "કૃપા કરીને તમારું નામ દાખલ કરો" :
-            "Please enter your name";
-          setError(errorMsg);
+        if (!identifier.trim()) {
+          setError(
+            userLanguage === "Hindi" ? "कृपया अपना मोबाइल नंबर या ईमेल दर्ज करें" :
+            userLanguage === "Marathi" ? "कृपया आपला मोबाईल किंवा ईमेल प्रविष्ट करा" :
+            "Please enter your mobile number or email"
+          );
           setLoading(false);
           return;
         }
-        const data = await registerUser(name, email, password);
+        if (!password) {
+          setError(
+            userLanguage === "Hindi" ? "कृपया पासवर्ड या पिन दर्ज करें" :
+            userLanguage === "Marathi" ? "कृपया पासवर्ड किंवा पिन प्रविष्ट करा" :
+            "Please enter your password or PIN"
+          );
+          setLoading(false);
+          return;
+        }
+
+        const data = await loginUser(identifier.trim(), password);
+        onAuthSuccess(data.user);
+      } else {
+        if (!name.trim()) {
+          setError(
+            userLanguage === "Hindi" ? "कृपया अपना पूरा नाम दर्ज करें" :
+            userLanguage === "Marathi" ? "कृपया आपले पूर्ण नाव प्रविष्ट करा" :
+            "Please enter your full name"
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (!phone.trim() && !email.trim()) {
+          setError(
+            userLanguage === "Hindi" ? "कृपया मोबाइल नंबर या ईमेल दर्ज करें" :
+            userLanguage === "Marathi" ? "कृपया मोबाईल नंबर किंवा ईमेल प्रविष्ट करा" :
+            "Please provide a mobile number or email"
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (phone.trim() && phone.replace(/[^0-9]/g, "").length < 10) {
+          setError(
+            userLanguage === "Hindi" ? "कृपया सही १० अंकों का मोबाइल नंबर दर्ज करें" :
+            userLanguage === "Marathi" ? "कृपया योग्य १० अंकी मोबाईल नंबर प्रविष्ट करा" :
+            "Please enter a valid 10-digit mobile number"
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (!password || password.length < 4) {
+          setError(
+            userLanguage === "Hindi" ? "पासवर्ड/पिन कम से कम ४ अक्षरों का होना चाहिए" :
+            userLanguage === "Marathi" ? "पासवर्ड/पिन किमान ४ अक्षरांचा असावा" :
+            "Password/PIN must be at least 4 characters"
+          );
+          setLoading(false);
+          return;
+        }
+
+        const data = await registerUser({
+          name: name.trim(),
+          phone: phone.trim() || undefined,
+          email: email.trim() || undefined,
+          password
+        });
         onAuthSuccess(data.user);
       }
     } catch (err) {
-      console.error("Authentication error:", err);
+      console.error("[Auth] Error:", err);
       setError(err.message || t.errorOccurred);
     } finally {
       setLoading(false);
@@ -115,91 +195,169 @@ export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguag
   };
 
   return (
-    <div style={{ background: "#FBF8F3", height: "100%", display: "flex", flexDirection: "column", justifyCenter: "center", justifyContent: "center", padding: 24, position: "relative" }}>
+    <div
+      style={{
+        background: "var(--bg-primary, #0E0E10)",
+        minHeight: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: "20px 18px",
+        position: "relative",
+        overflowY: "auto",
+        transition: "background 0.3s ease",
+      }}
+    >
       <StatusBar light={false} />
 
       {onClose && (
         <button
+          type="button"
           onClick={onClose}
           style={{
             position: "absolute",
             top: 16,
             left: 16,
-            background: "#EDE8DF",
-            border: "none",
+            background: "var(--bg-card, #22222B)",
+            border: "1px solid var(--border-color, rgba(212,175,55,0.3))",
             borderRadius: "50%",
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
             fontSize: 14,
-            color: "#6B5B52"
+            color: "var(--text-main, #fff)",
+            zIndex: 10,
           }}
-          title="Continue as Guest"
+          title={t.guestMode}
         >
           ✕
         </button>
       )}
 
       {/* Language Switcher */}
-      <div style={{ position: "absolute", top: 16, right: 16, display: "inline-flex", background: "#EDE8DF", borderRadius: 10, padding: 3 }}>
-        {[
-          { code: "English", label: "English" },
-          { code: "Marathi", label: "मराठी" },
-          { code: "Hindi", label: "हिन्दी" },
-          { code: "Gujarati", label: "ગુજરાતી" }
-        ].map(lang => (
-          <button
-            key={lang.code}
-            onClick={() => setUserLanguage(lang.code)}
-            style={{
-              padding: "4px 10px", borderRadius: 8, border: "none", fontSize: 10, fontWeight: 700, cursor: "pointer",
-              background: userLanguage === lang.code ? "#fff" : "none",
-              color: userLanguage === lang.code ? "#8B3A2A" : "#6B5B52",
-              transition: "0.2s"
-            }}
-          >
-            {lang.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Logo Area */}
-      <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#8B3A2A", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 32, boxShadow: "0 8px 16px rgba(139,58,42,0.15)" }}>
-          🚩
+      {setUserLanguage && (
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            display: "inline-flex",
+            background: "var(--bg-card, #22222B)",
+            border: "1px solid var(--border-color, rgba(212,175,55,0.25))",
+            borderRadius: 12,
+            padding: 3,
+            zIndex: 10,
+          }}
+        >
+          {[
+            { code: "Hindi", label: "हिन्दी" },
+            { code: "English", label: "Eng" },
+            { code: "Marathi", label: "मराठी" },
+            { code: "Gujarati", label: "ગુજરાતી" }
+          ].map((lang) => (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => setUserLanguage(lang.code)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: 8,
+                border: "none",
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                background: userLanguage === lang.code ? "var(--accent-primary, #FF9933)" : "none",
+                color: userLanguage === lang.code ? "var(--cta-text, #0E0E10)" : "var(--text-sub, #A1A1AF)",
+                transition: "0.2s"
+              }}
+            >
+              {lang.label}
+            </button>
+          ))}
         </div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#1C1412", fontFamily: "Mukta", letterSpacing: 0.5 }}>
+      )}
+
+      {/* Header Logo */}
+      <div style={{ textAlign: "center", marginBottom: 20, marginTop: 40 }}>
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #FF9933 0%, #D4AF37 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 10px",
+            fontSize: 30,
+            boxShadow: "0 8px 24px rgba(255,153,51,0.35)",
+          }}
+        >
+          🕉️
+        </div>
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 800,
+            color: "var(--text-main, #F5F5F7)",
+            fontFamily: "var(--font-heading)",
+            letterSpacing: 0.5,
+          }}
+        >
           {t.puneExplorer}
         </div>
-        <div style={{ fontSize: 12, color: "#6B5B52", marginTop: 4 }}>
+        <div style={{ fontSize: 12, color: "var(--text-sub, #A1A1AF)", marginTop: 4 }}>
           {t.welcomeSubtitle}
         </div>
       </div>
 
       {/* Form Card */}
-      <div style={{ background: "#fff", padding: 20, borderRadius: 20, border: "1px solid #EDE8DF", boxShadow: "0 6px 20px rgba(0,0,0,0.02)" }}>
+      <div
+        style={{
+          background: "var(--bg-surface, #18181D)",
+          padding: 20,
+          borderRadius: 22,
+          border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+          boxShadow: "var(--card-shadow, 0 12px 36px rgba(0,0,0,0.6))",
+        }}
+      >
         {/* Tab switchers */}
-        <div style={{ display: "flex", marginBottom: 20, borderBottom: "1.5px solid #EDE8DF" }}>
+        <div style={{ display: "flex", marginBottom: 18, borderBottom: "1.5px solid var(--border-subtle, #2E2E3C)" }}>
           <button
+            type="button"
             onClick={() => { setIsLogin(true); setError(""); }}
             style={{
-              flex: 1, padding: "10px 0", fontSize: 13, fontWeight: 700, border: "none", background: "none", cursor: "pointer",
-              color: isLogin ? "#8B3A2A" : "#6B5B52",
-              borderBottom: isLogin ? "3.5px solid #8B3A2A" : "3.5px solid transparent",
+              flex: 1,
+              padding: "10px 0",
+              fontSize: 13,
+              fontWeight: 700,
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              color: isLogin ? "var(--accent-primary, #FF9933)" : "var(--text-sub, #A1A1AF)",
+              borderBottom: isLogin ? "3.5px solid var(--accent-primary, #FF9933)" : "3.5px solid transparent",
               transition: "all 0.2s"
             }}
           >
             {t.login}
           </button>
           <button
+            type="button"
             onClick={() => { setIsLogin(false); setError(""); }}
             style={{
-              flex: 1, padding: "10px 0", fontSize: 13, fontWeight: 700, border: "none", background: "none", cursor: "pointer",
-              color: !isLogin ? "#8B3A2A" : "#6B5B52",
-              borderBottom: !isLogin ? "3.5px solid #8B3A2A" : "3.5px solid transparent",
+              flex: 1,
+              padding: "10px 0",
+              fontSize: 13,
+              fontWeight: 700,
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              color: !isLogin ? "var(--accent-primary, #FF9933)" : "var(--text-sub, #A1A1AF)",
+              borderBottom: !isLogin ? "3.5px solid var(--accent-primary, #FF9933)" : "3.5px solid transparent",
               transition: "all 0.2s"
             }}
           >
@@ -208,45 +366,163 @@ export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguag
         </div>
 
         {error && (
-          <div style={{ background: "#FDF2F2", color: "#DE350B", padding: "10px 12px", borderRadius: 10, fontSize: 11, fontWeight: 600, marginBottom: 16, border: "1px solid #FAD2D2" }}>
-            ⚠️ {error}
+          <div
+            style={{
+              background: "rgba(233,30,99,0.15)",
+              color: "#FF6B8B",
+              padding: "10px 12px",
+              borderRadius: 12,
+              fontSize: 11,
+              fontWeight: 600,
+              marginBottom: 16,
+              border: "1px solid rgba(233,30,99,0.3)",
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }}
+          >
+            <span>⚠️</span>
+            <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Registration: Full Name */}
           {!isLogin && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#6B5B52", marginBottom: 6 }}>{t.name}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 6 }}>
+                {t.name} <span style={{ color: "var(--accent-primary, #FF9933)" }}>*</span>
+              </div>
               <input
                 type="text"
                 placeholder={t.enterName}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
+                required
                 style={{
-                  width: "100%", padding: "11px 14px", borderRadius: 10, border: "1px solid #EDE8DF",
-                  fontSize: 13, outline: "none", background: "#FBF8F3", fontFamily: "inherit"
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+                  fontSize: 14,
+                  outline: "none",
+                  background: "var(--bg-elevated, #2A2A36)",
+                  color: "var(--text-main, #F5F5F7)",
+                  fontFamily: "inherit",
+                  boxSizing: "border-box"
                 }}
               />
             </div>
           )}
 
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#6B5B52", marginBottom: 6 }}>{t.email}</div>
-            <input
-              type="email"
-              placeholder={t.enterEmail}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: "100%", padding: "11px 14px", borderRadius: 10, border: "1px solid #EDE8DF",
-                fontSize: 13, outline: "none", background: "#FBF8F3", fontFamily: "inherit"
-              }}
-            />
-          </div>
+          {/* Registration: Mobile Number (Primary for Indian tourists & pilgrims) */}
+          {!isLogin ? (
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 6 }}>
+                📱 {t.phone} <span style={{ color: "var(--accent-primary, #FF9933)" }}>*</span>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <div
+                  style={{
+                    padding: "12px 10px",
+                    borderRadius: 12,
+                    background: "var(--bg-elevated, #2A2A36)",
+                    border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+                    color: "var(--accent-primary, #FF9933)",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  🇮🇳 +91
+                </div>
+                <input
+                  type="tel"
+                  placeholder={t.enterPhone}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
+                  autoComplete="tel"
+                  style={{
+                    flex: 1,
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+                    fontSize: 14,
+                    outline: "none",
+                    background: "var(--bg-elevated, #2A2A36)",
+                    color: "var(--text-main, #F5F5F7)",
+                    fontFamily: "inherit",
+                    letterSpacing: 1,
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
 
+          {/* Registration: Email (Optional) */}
+          {!isLogin && (
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-sub, #A1A1AF)", marginBottom: 6 }}>
+                ✉️ {t.emailOptional}
+              </div>
+              <input
+                type="email"
+                placeholder={t.enterEmail}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border-subtle, #333)",
+                  fontSize: 13,
+                  outline: "none",
+                  background: "var(--bg-elevated, #2A2A36)",
+                  color: "var(--text-main, #F5F5F7)",
+                  fontFamily: "inherit",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          )}
+
+          {/* Login Mode: Combined Mobile Number or Email */}
+          {isLogin && (
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 6 }}>
+                📱 / ✉️ {t.identifier}
+              </div>
+              <input
+                type="text"
+                placeholder={t.enterIdentifier}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+                  fontSize: 14,
+                  outline: "none",
+                  background: "var(--bg-elevated, #2A2A36)",
+                  color: "var(--text-main, #F5F5F7)",
+                  fontFamily: "inherit",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          )}
+
+          {/* Password / 4-Digit PIN */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#6B5B52", marginBottom: 6 }}>{t.password}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 6 }}>
+              🔒 {t.password}
+            </div>
             <input
               type="password"
               placeholder={t.enterPassword}
@@ -254,8 +530,16 @@ export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguag
               onChange={(e) => setPassword(e.target.value)}
               required
               style={{
-                width: "100%", padding: "11px 14px", borderRadius: 10, border: "1px solid #EDE8DF",
-                fontSize: 13, outline: "none", background: "#FBF8F3", fontFamily: "inherit"
+                width: "100%",
+                padding: "12px 14px",
+                borderRadius: 12,
+                border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
+                fontSize: 14,
+                outline: "none",
+                background: "var(--bg-elevated, #2A2A36)",
+                color: "var(--text-main, #F5F5F7)",
+                fontFamily: "inherit",
+                boxSizing: "border-box"
               }}
             />
           </div>
@@ -264,64 +548,49 @@ export default function AuthScreen({ onAuthSuccess, userLanguage, setUserLanguag
             type="submit"
             disabled={loading}
             style={{
-              width: "100%", padding: "12px", borderRadius: 12, border: "none",
-              background: "#8B3A2A", color: "#fff", fontWeight: 700, cursor: "pointer",
-              fontSize: 13, marginTop: 8, boxShadow: "0 4px 10px rgba(139,58,42,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "center"
+              width: "100%",
+              padding: "13px",
+              borderRadius: 14,
+              border: "none",
+              background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
+              color: "var(--cta-text, #0E0E10)",
+              fontWeight: 800,
+              cursor: loading ? "wait" : "pointer",
+              fontSize: 14,
+              marginTop: 8,
+              boxShadow: "0 6px 18px rgba(255,153,51,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              letterSpacing: 0.5
             }}
           >
             {loading ? (
-              <span style={{ fontSize: 12 }}>...</span>
+              <span style={{ fontSize: 13 }}>⌛ कृपया प्रतीक्षा करें...</span>
             ) : (
-              isLogin ? t.login : t.register
+              isLogin ? `🚀 ${t.login}` : `✨ ${t.register}`
             )}
           </button>
         </form>
-      </div>
 
-      {/* Switch Link */}
-      <div style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "#6B5B52" }}>
-        {isLogin ? (
-          <>
-            {t.dontHaveAccount}{" "}
-            <span
-              onClick={() => { setIsLogin(false); setError(""); }}
-              style={{ color: "#8B3A2A", fontWeight: 700, cursor: "pointer" }}
-            >
-              {t.register}
-            </span>
-          </>
-        ) : (
-          <>
-            {t.alreadyHaveAccount}{" "}
-            <span
-              onClick={() => { setIsLogin(true); setError(""); }}
-              style={{ color: "#8B3A2A", fontWeight: 700, cursor: "pointer" }}
-            >
-              {t.login}
-            </span>
-          </>
-        )}
-      </div>
-
-      {onClose && (
         <div style={{ textAlign: "center", marginTop: 14 }}>
           <button
-            onClick={onClose}
+            type="button"
+            onClick={() => { setIsLogin(!isLogin); setError(""); }}
             style={{
               background: "none",
               border: "none",
-              color: "#8B3A2A",
+              color: "var(--accent-primary, #FF9933)",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
               textDecoration: "underline"
             }}
           >
-            {userLanguage === "Marathi" ? "लॉगिन न करता पुढे जा (अतिथी)" : "Continue as Guest Explorer"}
+            {isLogin ? t.dontHaveAccount + " " + t.register : t.alreadyHaveAccount + " " + t.login}
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

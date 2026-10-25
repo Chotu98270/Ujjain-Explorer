@@ -44,12 +44,26 @@ const getHeaders = (extraHeaders = {}) => {
   return headers;
 };
 
-export const loginUser = async (email, password) => {
+// Fast fetch helper with 1.2s timeout to prevent UI freezes
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 1200) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+};
+
+export const loginUser = async (identifierOrEmail, password) => {
   clearApiCache();
   const response = await fetch(`${API_BASE_URL}/user/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ identifier: identifierOrEmail, password })
   });
   
   if (!response.ok) {
@@ -61,16 +75,25 @@ export const loginUser = async (email, password) => {
   if (data.token) {
     localStorage.setItem('pune_auth_token', data.token);
     localStorage.setItem('pune_user_name', data.user.name);
+    if (data.user.phone) localStorage.setItem('pune_user_phone', data.user.phone);
+    if (data.user.email) localStorage.setItem('pune_user_email', data.user.email);
   }
   return data;
 };
 
-export const registerUser = async (name, email, password) => {
+export const registerUser = async (params, maybeEmail, maybePassword) => {
   clearApiCache();
+  let bodyPayload = {};
+  if (typeof params === 'object' && params !== null) {
+    bodyPayload = params;
+  } else {
+    bodyPayload = { name: params, email: maybeEmail, password: maybePassword };
+  }
+
   const response = await fetch(`${API_BASE_URL}/user/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
+    body: JSON.stringify(bodyPayload)
   });
   
   if (!response.ok) {
@@ -82,6 +105,8 @@ export const registerUser = async (name, email, password) => {
   if (data.token) {
     localStorage.setItem('pune_auth_token', data.token);
     localStorage.setItem('pune_user_name', data.user.name);
+    if (data.user.phone) localStorage.setItem('pune_user_phone', data.user.phone);
+    if (data.user.email) localStorage.setItem('pune_user_email', data.user.email);
   }
   return data;
 };
@@ -110,7 +135,7 @@ export const fetchPlaces = async (params = {}) => {
   }
 
   try {
-    const response = await fetch(url, { headers: getHeaders() });
+    const response = await fetchWithTimeout(url, { headers: getHeaders() }, 1500);
     if (response.ok) {
       const data = await response.json();
       if (Array.isArray(data)) {
@@ -121,7 +146,7 @@ export const fetchPlaces = async (params = {}) => {
       }
     }
   } catch (err) {
-    console.warn(`[API] Remote places endpoint unreachable (${url}):`, err.message, '- Using local Ujjain dataset.');
+    // Falls back immediately to offline dataset
   }
 
   // Graceful offline fallback
@@ -160,7 +185,7 @@ export const fetchEvents = async () => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(cacheKey, { headers: getHeaders() });
+    const response = await fetchWithTimeout(cacheKey, { headers: getHeaders() }, 1500);
     if (response.ok) {
       const data = await response.json();
       if (Array.isArray(data)) {
@@ -169,7 +194,7 @@ export const fetchEvents = async () => {
       }
     }
   } catch (err) {
-    console.warn('[API] Events endpoint unreachable, using local dataset:', err.message);
+    // Immediate fallback
   }
   return fallbackEvents;
 };
@@ -180,7 +205,7 @@ export const fetchItinerary = async () => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(cacheKey, { headers: getHeaders() });
+    const response = await fetchWithTimeout(cacheKey, { headers: getHeaders() }, 1500);
     if (response.ok) {
       const data = await response.json();
       if (Array.isArray(data)) {
@@ -189,7 +214,7 @@ export const fetchItinerary = async () => {
       }
     }
   } catch (err) {
-    console.warn('[API] Itinerary endpoint unreachable, using local dataset:', err.message);
+    // Immediate fallback
   }
   return fallbackItineraries;
 };

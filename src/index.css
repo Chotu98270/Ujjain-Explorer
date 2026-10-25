@@ -2,11 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply antialiased;
-    font-family: 'Mukta', 'Inter', sans-serif;
-  }
+/* ========================================================
+   THEME 1: MAHAKAL MYSTIQUE (Spiritual Royal Dark - Signature Default)
+   ======================================================== */
+:root, [data-theme="mahakal-mystique"] {
+  --font-heading: 'Cinzel', 'Rozha One', serif;
+  --font-body: 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+  --bg-primary: #0E0E10;
+  --bg-surface: #18181D;
+  --bg-card: #22222B;
+  --bg-elevated: #2A2A36;
+  
+  --border-color: rgba(212, 175, 55, 0.22);
+  --border-subtle: #2E2E3C;
+
+  --text-main: #F5F5F7;
+  --text-sub: #A1A1AF;
+  --text-muted: #6E6E7C;
+
+  --accent-primary: #FF9933;       /* Sacred Saffron / Marigold */
+  --accent-secondary: #D4AF37;     /* Antique Vedic Gold */
+  --accent-royal: #8B1E1E;         /* Rudraksha Crimson */
+
+  --cta-bg: linear-gradient(135deg, #FF9933 0%, #D4AF37 100%);
+  --cta-text: #0E0E10;
+
+  --nav-bg: rgba(14, 14, 16, 0.94);
+  --nav-border: #2A2A36;
+  --nav-active: #FF9933;
+  --nav-inactive: #8E8E9A;
+
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
+  --hero-gradient: linear-gradient(145deg, #1C0F08 0%, #0E0E10 100%);
+  --hero-border: rgba(255, 153, 51, 0.28);
+}
+
+/* ========================================================
+   THEME 2: SHIPRA DAWN (Serene Traditional Light)
+   ======================================================== */
+[data-theme="shipra-dawn"] {
+  --font-heading: 'Cormorant Garamond', 'Rozha One', serif;
+  --font-body: 'Work Sans', 'Inter', sans-serif;
+
+  --bg-primary: #FAF9F6;
+  --bg-surface: #FFFFFF;
+  --bg-card: #F4F0E8;
+  --bg-elevated: #EDE8DF;
+
+  --border-color: #E3DAC9;
+  --border-subtle: #EDE7DC;
+
+  --text-main: #1A252F;
+  --text-sub: #566573;
+  --text-muted: #85929E;
+
+  --accent-primary: #1B4F72;       /* Sacred Shipra Deep Teal */
+  --accent-secondary: #E67E22;     /* Sunset Sindoor Vermillion */
+  --accent-royal: #D4AC0D;         /* Temple Haldi Gold */
+
+  --cta-bg: linear-gradient(135deg, #1B4F72 0%, #154360 100%);
+  --cta-text: #FFFFFF;
+
+  --nav-bg: rgba(250, 249, 246, 0.94);
+  --nav-border: #E8E2D5;
+  --nav-active: #1B4F72;
+  --nav-inactive: #6B5B52;
+
+  --card-shadow: 0 4px 20px rgba(27, 79, 114, 0.08);
+  --hero-gradient: linear-gradient(145deg, #1B4F72 0%, #154360 100%);
+  --hero-border: rgba(230, 126, 34, 0.35);
+}
+
+/* ========================================================
+   THEME 3: KUMBH VIBRANT (Modern Festive Mela)
+   ======================================================== */
+[data-theme="kumbh-vibrant"] {
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', 'Inter', sans-serif;
+
+  --bg-primary: #FFFFFF;
+  --bg-surface: #F8F9FA;
+  --bg-card: #F1F3F5;
+  --bg-elevated: #E9ECEF;
+
+  --border-color: #E2E8F0;
+  --border-subtle: #ECEFF1;
+
+  --text-main: #17202A;
+  --text-sub: #424949;
+  --text-muted: #707B7C;
+
+  --accent-primary: #5B2C6F;       /* Ceremonial Royal Purple */
+  --accent-secondary: #E91E63;     /* Festival Gulal Pink */
+  --accent-royal: #F39C12;         /* Haldi Amber */
+
+  --cta-bg: linear-gradient(135deg, #5B2C6F 0%, #E91E63 100%);
+  --cta-text: #FFFFFF;
+
+  --nav-bg: rgba(255, 255, 255, 0.95);
+  --nav-border: #E2E8F0;
+  --nav-active: #5B2C6F;
+  --nav-inactive: #64748B;
+
+  --card-shadow: 0 6px 24px rgba(91, 44, 111, 0.12);
+  --hero-gradient: linear-gradient(145deg, #5B2C6F 0%, #884EA0 100%);
+  --hero-border: rgba(233, 30, 99, 0.4);
 }
 
 * {
@@ -16,8 +117,10 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background: #f3f4f6;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  background: var(--bg-primary, #0E0E10);
+  color: var(--text-main, #F5F5F7);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Scrollbar hidden on webkit */
@@ -25,12 +128,27 @@ body {
   display: none;
 }
 
-/* Remove default button outline */
-button:focus {
+button:focus, input:focus {
   outline: none;
 }
 
-/* Remove default input outline */
-input:focus {
-  outline: none;
+/* Theme Switcher Slide-Down Keyframes */
+@keyframes slideDownTheme {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInBackdrop {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

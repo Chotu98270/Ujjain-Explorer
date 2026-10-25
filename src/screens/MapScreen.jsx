@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import StatusBar from "../components/StatusBar";
 import GoogleMapView from "../components/GoogleMapView";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import { fetchPlaces, fetchItinerary, updateStopStatus, deleteStopFromItinerary, addStopToItinerary } from "../data/api";
 import { translations } from "../data/translations";
 import { categories } from "../data/puneData";
@@ -358,12 +359,14 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
     }
   }
 
-  // Fetch dynamic road route from OSRM (with steps=true)
+  // Fetch dynamic road route from OSRM (only used as fallback when Google Maps is not active)
   useEffect(() => {
-    if (points.length < 2) {
-      setRouteGeometry([]);
-      setRouteStats({ distanceKm: 0, durationSec: 0 });
-      setDirections([]);
+    if (googleApiKey || points.length < 2) {
+      if (!googleApiKey) {
+        setRouteGeometry([]);
+        setRouteStats({ distanceKm: 0, durationSec: 0 });
+        setDirections([]);
+      }
       return;
     }
 
@@ -479,20 +482,20 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
   };
 
   return (
-    <div style={{ background: "#FBF8F3", height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", display: "flex", flexDirection: "column", transition: "background 0.3s ease" }}>
       <StatusBar />
 
-      {/* Header */}
-      <div style={{ background: "#FBF8F3", padding: "10px 16px 8px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#1C1412", flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
-            <span>{stops.length > 0 ? t.heritageTrail : t.map}</span>
+      {/* Themed Map Header with Flagship Switcher */}
+      <div style={{ background: "var(--bg-primary, #0E0E10)", padding: "10px 16px 8px", borderBottom: "1px solid var(--border-color, rgba(212,175,55,0.2))" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)", display: "flex", alignItems: "center", gap: 8 }}>
+            <span>{stops.length > 0 ? t.heritageTrail : t.map} 🪔</span>
             {weatherData && (
               <span
                 style={{
                   fontSize: 10,
-                  background: weatherData.weather === "Sunny" ? "#FEF3C7" : "#DBEAFE",
-                  color: weatherData.weather === "Sunny" ? "#92400E" : "#1E40AF",
+                  background: "rgba(255,153,51,0.18)",
+                  color: "var(--accent-primary, #FF9933)",
                   borderRadius: 10,
                   padding: "2px 8px",
                   fontWeight: 600,
@@ -505,9 +508,10 @@ export default function MapScreen({ userLocation, userLanguage, weatherData }) {
               </span>
             )}
           </div>
-          <div style={{ fontSize: 11, color: "#8B3A2A", fontWeight: 600 }}>
-            {getSubHeaderLabel()}
-          </div>
+          <ThemeSwitcher variant="header" userLanguage={userLanguage} />
+        </div>
+        <div style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 600, marginTop: 4 }}>
+          {getSubHeaderLabel()}
         </div>
       </div>
 
