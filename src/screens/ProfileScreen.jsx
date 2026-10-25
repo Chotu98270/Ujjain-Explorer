@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceListItem from "../components/PlaceListItem";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -24,8 +24,47 @@ const languageOptions = [
   { code: "Sanskrit", label: "संस्कृतम् (Sanskrit)" }
 ];
 
+// Helper to scale & optimize user avatar for storage across iOS, Android, and Web
+const processImageFile = (file, callback) => {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 320;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+      callback(dataUrl);
+    };
+    img.onerror = () => {
+      callback(e.target.result);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
 export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguage, setUserLanguage, onLogout, onOpenAuth, user }) {
   const token = localStorage.getItem("pune_auth_token");
+  const directFileInputRef = useRef(null);
+  const [photoToast, setPhotoToast] = useState("");
 
   // User Personalization State with automatic prop/storage synchronization
   const [userName, setUserName] = useState(() => {
@@ -122,14 +161,41 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
     setIsEditModalOpen(false);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleDirectAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTempAvatar(reader.result);
-      };
-      reader.readAsDataURL(file);
+      processImageFile(file, (dataUrl) => {
+        setUserAvatar(dataUrl);
+        setTempAvatar(dataUrl);
+        try {
+          localStorage.setItem("pune_user_avatar", dataUrl);
+          setPhotoToast(userLanguage === "Hindi" ? "प्रोफ़ाइल फ़ोटो सफलतापूर्वक अपडेट की गई! 📸" : "Profile photo updated successfully! 📸");
+          setTimeout(() => setPhotoToast(""), 3000);
+        } catch (err) {
+          console.warn("Could not save avatar to localStorage:", err);
+        }
+      });
+    }
+  };
+
+  const handleRemoveAvatar = (e) => {
+    e.stopPropagation();
+    setUserAvatar(null);
+    setTempAvatar(null);
+    localStorage.removeItem("pune_user_avatar");
+    if (directFileInputRef.current) {
+      directFileInputRef.current.value = "";
+    }
+    setPhotoToast(userLanguage === "Hindi" ? "फ़ोटो हटा दी गई" : "Photo removed");
+    setTimeout(() => setPhotoToast(""), 2500);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageFile(file, (dataUrl) => {
+        setTempAvatar(dataUrl);
+      });
     }
   };
 
@@ -329,35 +395,145 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
         </div>
 
         <div className="max-w-4xl mx-auto relative z-10 text-center">
-          {/* Profile Avatar Container with crisp Vedic Gold border */}
-          <div
-            style={{
-              width: 90,
-              height: 90,
-              borderRadius: "50%",
-              background: "var(--bg-card, #22222B)",
-              margin: "0 auto 14px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 42,
-              border: "3.5px solid var(--accent-secondary, #D4AF37)",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
-              overflow: "hidden",
-              position: "relative",
-            }}
-          >
-            {userAvatar ? (
-              <img
-                src={userAvatar}
-                alt={userName}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={() => setUserAvatar(null)}
-              />
-            ) : (
-              <span style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}>👤</span>
+          {/* Profile Avatar Center with Direct Click-to-Upload */}
+          <div style={{ position: "relative", display: "inline-block", margin: "0 auto 8px" }}>
+            <label
+              htmlFor="direct-profile-avatar-input"
+              style={{ cursor: "pointer", display: "block", position: "relative" }}
+              title={userLanguage === "Hindi" ? "फ़ोटो अपलोड करने के लिए क्लिक करें" : "Click to upload profile photo"}
+            >
+              <div
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: "50%",
+                  background: "var(--bg-card, #22222B)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 44,
+                  border: "3.5px solid var(--accent-secondary, #D4AF37)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                  overflow: "hidden",
+                  position: "relative",
+                  transition: "transform 0.2s ease",
+                }}
+                className="hover:scale-105"
+              >
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt={userName}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={() => setUserAvatar(null)}
+                  />
+                ) : (
+                  <span style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}>👤</span>
+                )}
+              </div>
+
+              {/* Camera Upload Badge */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  background: "var(--accent-primary, #FF9933)",
+                  color: "#0E0E10",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                  border: "2.5px solid #18181D",
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.45)",
+                  cursor: "pointer",
+                  transition: "transform 0.15s ease",
+                }}
+                className="hover:scale-110"
+                title={userLanguage === "Hindi" ? "फ़ोटो बदलें" : "Upload photo"}
+              >
+                📷
+              </div>
+            </label>
+
+            <input
+              id="direct-profile-avatar-input"
+              ref={directFileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleDirectAvatarUpload}
+              style={{ display: "none" }}
+            />
+          </div>
+
+          {/* Quick Photo Upload & Remove Action Buttons */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10 }}>
+            <button
+              type="button"
+              onClick={() => directFileInputRef.current?.click()}
+              style={{
+                background: "rgba(255, 153, 51, 0.15)",
+                border: "1px solid var(--accent-primary, #FF9933)",
+                color: "var(--accent-primary, #FF9933)",
+                borderRadius: 20,
+                padding: "4px 14px",
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                transition: "all 0.15s ease",
+              }}
+              className="hover:opacity-90 active:scale-95"
+            >
+              <span>📷</span>
+              <span>{userAvatar ? (userLanguage === "Hindi" ? "फ़ोटो बदलें" : "Change Photo") : (userLanguage === "Hindi" ? "फ़ोटो अपलोड करें" : "Upload Photo")}</span>
+            </button>
+
+            {userAvatar && (
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                style={{
+                  background: "rgba(231, 76, 60, 0.15)",
+                  border: "1px solid rgba(231, 76, 60, 0.4)",
+                  color: "#E74C3C",
+                  borderRadius: 20,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                className="hover:opacity-90 active:scale-95"
+                title="Remove photo"
+              >
+                ✕ {userLanguage === "Hindi" ? "हटाएं" : "Remove"}
+              </button>
             )}
           </div>
+
+          {/* Upload Feedback Toast */}
+          {photoToast && (
+            <div style={{
+              display: "inline-block",
+              background: "rgba(46, 204, 113, 0.2)",
+              border: "1px solid rgba(46, 204, 113, 0.5)",
+              color: "#2ECC71",
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "4px 12px",
+              borderRadius: 12,
+              marginBottom: 8,
+              animation: "fadeInBackdrop 0.2s ease-out forwards",
+            }}>
+              {photoToast}
+            </div>
+          )}
 
           {/* High-visibility Username and Bio */}
           <div style={{ 

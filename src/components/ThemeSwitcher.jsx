@@ -1,31 +1,67 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useTheme, THEMES, THEME_DETAILS } from "../context/ThemeContext";
 
 export default function ThemeSwitcher({ variant = "header", userLanguage = "English" }) {
   const { theme, isAuto, setTheme, toggleAuto, themeConfig } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Close dropdown on click or touch outside
+  const updatePosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    }
+  }, []);
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    if (!isOpen) {
+      updatePosition();
+    }
+    setIsOpen((prev) => !prev);
+  };
+
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, []);
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    updatePosition();
+
     const handleDocumentClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
+      if (buttonRef.current && buttonRef.current.contains(e.target)) {
+        return;
       }
+      if (dropdownRef.current && dropdownRef.current.contains(e.target)) {
+        return;
+      }
+      setIsOpen(false);
     };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleDocumentClick);
-      document.addEventListener("touchstart", handleDocumentClick, { passive: true });
-    }
+
+    const handleScrollOrResize = () => {
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    document.addEventListener("touchstart", handleDocumentClick, { passive: true });
+    window.addEventListener("scroll", handleScrollOrResize, { capture: true, passive: true });
+    window.addEventListener("resize", handleScrollOrResize, { passive: true });
+
     return () => {
       document.removeEventListener("mousedown", handleDocumentClick);
       document.removeEventListener("touchstart", handleDocumentClick);
+      window.removeEventListener("scroll", handleScrollOrResize, { capture: true });
+      window.removeEventListener("resize", handleScrollOrResize);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   const themesList = [
     {
@@ -154,20 +190,18 @@ export default function ThemeSwitcher({ variant = "header", userLanguage = "Engl
     );
   }
 
-  // Header Pill Variant (Accessible on all screens with smooth sliding down)
+  // Header Pill Variant - Rendered via React Portal directly into body with zIndex 99999 so search bar and headers NEVER overlap it
   return (
-    <div ref={dropdownRef} style={{ position: "relative", display: "inline-block", zIndex: 90 }}>
+    <div style={{ position: "relative", display: "inline-block" }}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen((prev) => !prev);
-        }}
+        onClick={handleToggle}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 6,
-          background: "rgba(0, 0, 0, 0.35)",
+          background: "rgba(0, 0, 0, 0.4)",
           backdropFilter: "blur(14px)",
           border: "1px solid rgba(255, 255, 255, 0.25)",
           borderRadius: 20,
@@ -198,119 +232,124 @@ export default function ThemeSwitcher({ variant = "header", userLanguage = "Engl
         </span>
       </button>
 
-      {/* Dimmed Backdrop to prevent miss-clicks and ensure smooth outside-tap dismissal */}
-      {isOpen && (
-        <div
-          onClick={handleClose}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 85,
-            background: "rgba(0, 0, 0, 0.4)",
-            animation: "fadeInBackdrop 0.15s ease-out forwards",
-          }}
-        />
-      )}
-
-      {/* Dropdown Popup with Slide-Down Animation */}
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            right: 0,
-            width: 236,
-            background: "var(--bg-surface, #18181D)",
-            border: "1.5px solid var(--border-color, rgba(212,175,55,0.35))",
-            borderRadius: 18,
-            padding: 8,
-            boxShadow: "0 16px 40px rgba(0,0,0,0.65)",
-            backdropFilter: "blur(24px)",
-            animation: "slideDownTheme 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            zIndex: 95,
-            maxHeight: "calc(100vh - 120px)",
-            overflowY: "auto",
-          }}
-        >
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted, #888)", padding: "4px 8px 6px", textTransform: "uppercase", letterSpacing: 0.5 }}>
-            {userLanguage === "Hindi" ? "थीम चयन (Themes)" : "Sacred Themes"}
-          </div>
-
-          {themesList.map((t) => {
-            const isSelected = theme === t.id && !isAuto;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTheme(t.id);
-                  setIsOpen(false);
-                }}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 10px",
-                  borderRadius: 12,
-                  border: "none",
-                  background: isSelected ? "var(--bg-elevated, #2A2A36)" : "transparent",
-                  color: isSelected ? t.color : "var(--text-main, #F5F5F7)",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  marginBottom: 3,
-                  transition: "background 0.15s ease",
-                }}
-              >
-                <span style={{ fontSize: 18 }}>{t.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: isSelected ? 700 : 500 }}>
-                    {userLanguage === "Hindi" || userLanguage === "Sanskrit" ? t.nameHi : t.name}
-                  </div>
-                  <div style={{ fontSize: 9, color: "var(--text-sub, #888)" }}>{t.sub}</div>
-                </div>
-                {isSelected && <span style={{ color: t.color, fontSize: 14, fontWeight: 700 }}>✓</span>}
-              </button>
-            );
-          })}
-
-          <div style={{ height: 1, background: "var(--border-subtle, #2E2E3C)", margin: "4px 0" }} />
-
-          {/* Kāla Chakra Auto Option */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleAuto();
-              setIsOpen(false);
-            }}
+      {/* Render via Portal so it NEVER gets cut off or overlapped by Search Bar, Hero, or any parent stacking context */}
+      {isOpen && typeof document !== "undefined" && createPortal(
+        <>
+          {/* Dimmed Backdrop to dismiss */}
+          <div
+            onClick={handleClose}
             style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "9px 10px",
-              borderRadius: 12,
-              border: "none",
-              background: isAuto ? "rgba(255,153,51,0.15)" : "transparent",
-              color: isAuto ? "#FF9933" : "var(--text-main, #F5F5F7)",
-              cursor: "pointer",
-              textAlign: "left",
+              position: "fixed",
+              inset: 0,
+              zIndex: 99998,
+              background: "rgba(0, 0, 0, 0.45)",
+              animation: "fadeInBackdrop 0.15s ease-out forwards",
+            }}
+          />
+
+          {/* Floating Dropdown with absolute top-level stacking context */}
+          <div
+            ref={dropdownRef}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              top: dropdownPosition.top,
+              right: dropdownPosition.right,
+              width: 240,
+              maxWidth: "calc(100vw - 24px)",
+              background: "var(--bg-surface, #18181D)",
+              border: "1.5px solid var(--border-color, rgba(212,175,55,0.35))",
+              borderRadius: 18,
+              padding: 8,
+              boxShadow: "0 20px 48px rgba(0,0,0,0.75)",
+              backdropFilter: "blur(24px)",
+              animation: "slideDownTheme 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              zIndex: 99999,
+              maxHeight: "calc(100vh - 120px)",
+              overflowY: "auto",
             }}
           >
-            <span style={{ fontSize: 16 }}>⌛</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: isAuto ? 700 : 500 }}>
-                {userLanguage === "Hindi" ? "काल चक्र (Auto Engine)" : "Kāla Chakra (Auto Engine)"}
-              </div>
-              <div style={{ fontSize: 9, color: "var(--text-sub, #888)" }}>
-                {userLanguage === "Hindi" ? "समय अनुसार स्वतः परिवर्तन" : "Diurnal solar & temple synchronization"}
-              </div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted, #888)", padding: "4px 8px 6px", textTransform: "uppercase", letterSpacing: 0.5 }}>
+              {userLanguage === "Hindi" ? "थीम चयन (Themes)" : "Sacred Themes"}
             </div>
-            {isAuto && <span style={{ color: "#FF9933", fontSize: 14, fontWeight: 700 }}>✓</span>}
-          </button>
-        </div>
+
+            {themesList.map((t) => {
+              const isSelected = theme === t.id && !isAuto;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTheme(t.id);
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "9px 10px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: isSelected ? "var(--bg-elevated, #2A2A36)" : "transparent",
+                    color: isSelected ? t.color : "var(--text-main, #F5F5F7)",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    marginBottom: 3,
+                    transition: "background 0.15s ease",
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>{t.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: isSelected ? 700 : 500 }}>
+                      {userLanguage === "Hindi" || userLanguage === "Sanskrit" ? t.nameHi : t.name}
+                    </div>
+                    <div style={{ fontSize: 9, color: "var(--text-sub, #888)" }}>{t.sub}</div>
+                  </div>
+                  {isSelected && <span style={{ color: t.color, fontSize: 14, fontWeight: 700 }}>✓</span>}
+                </button>
+              );
+            })}
+
+            <div style={{ height: 1, background: "var(--border-subtle, #2E2E3C)", margin: "4px 0" }} />
+
+            {/* Kāla Chakra Auto Option */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleAuto();
+                setIsOpen(false);
+              }}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "9px 10px",
+                borderRadius: 12,
+                border: "none",
+                background: isAuto ? "rgba(255,153,51,0.15)" : "transparent",
+                color: isAuto ? "#FF9933" : "var(--text-main, #F5F5F7)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <span style={{ fontSize: 16 }}>⌛</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: isAuto ? 700 : 500 }}>
+                  {userLanguage === "Hindi" ? "काल चक्र (Auto Engine)" : "Kāla Chakra (Auto Engine)"}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--text-sub, #888)" }}>
+                  {userLanguage === "Hindi" ? "समय अनुसार स्वतः परिवर्तन" : "Diurnal solar & temple synchronization"}
+                </div>
+              </div>
+              {isAuto && <span style={{ color: "#FF9933", fontSize: 14, fontWeight: 700 }}>✓</span>}
+            </button>
+          </div>
+        </>,
+        document.body
       )}
     </div>
   );
