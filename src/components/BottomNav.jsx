@@ -14,62 +14,64 @@ export default function BottomNav({ activeTab, onTabChange, userLanguage }) {
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 flex justify-around items-center border-t transition-colors duration-300"
+      className="w-full flex-shrink-0 border-t transition-colors duration-300 z-50 select-none"
       style={{
         background: "var(--nav-bg, rgba(14, 14, 16, 0.94))",
         borderColor: "var(--nav-border, #2A2A36)",
         backdropFilter: "blur(20px)",
-        paddingTop: 10,
-        paddingBottom: 16,
-        zIndex: 50,
+        WebkitBackdropFilter: "blur(20px)",
+        paddingTop: 8,
+        paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
       }}
     >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className="flex flex-col items-center gap-1 relative transition-all duration-200"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 10,
-              fontWeight: isActive ? 700 : 500,
-              color: isActive ? "var(--nav-active, #FF9933)" : "var(--nav-inactive, #8E8E9A)",
-              minWidth: 52,
-              transform: isActive ? "translateY(-2px)" : "none",
-            }}
-          >
-            <span
+      <div className="w-full max-w-xl mx-auto flex justify-around items-center px-2">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className="flex flex-col items-center gap-1 relative transition-all duration-200 py-1 px-2 sm:px-4"
               style={{
-                fontSize: 21,
-                filter: isActive ? "drop-shadow(0 2px 6px rgba(255,153,51,0.5))" : "none",
-                transition: "filter 0.2s ease",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 11,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? "var(--nav-active, #FF9933)" : "var(--nav-inactive, #8E8E9A)",
+                minWidth: 54,
+                transform: isActive ? "translateY(-2px)" : "none",
               }}
             >
-              {tab.icon}
-            </span>
-            <span style={{ letterSpacing: 0.2 }}>{tab.label}</span>
-
-            {/* Sacred Active Indicator (Diya flame halo / River ripple) */}
-            {isActive && (
-              <div
+              <span
                 style={{
-                  position: "absolute",
-                  bottom: -6,
-                  width: 16,
-                  height: 3,
-                  borderRadius: 3,
-                  background: "var(--nav-active, #FF9933)",
-                  boxShadow: "0 0 8px var(--nav-active, #FF9933)",
+                  fontSize: 22,
+                  filter: isActive ? "drop-shadow(0 2px 6px rgba(255,153,51,0.5))" : "none",
+                  transition: "filter 0.2s ease",
                 }}
-              />
-            )}
-          </button>
-        );
-      })}
+              >
+                {tab.icon}
+              </span>
+              <span style={{ letterSpacing: 0.2 }}>{tab.label}</span>
+
+              {/* Sacred Active Indicator (Diya flame halo / River ripple) */}
+              {isActive && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: -4,
+                    width: 18,
+                    height: 3,
+                    borderRadius: 3,
+                    background: "var(--nav-active, #FF9933)",
+                    boxShadow: "0 0 10px var(--nav-active, #FF9933)",
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

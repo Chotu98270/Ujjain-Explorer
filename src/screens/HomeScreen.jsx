@@ -214,10 +214,10 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "6px 16px 10px",
+            padding: "8px 16px 12px",
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
             {t.popularSpots}
           </div>
           <div onClick={onSearchClick} style={{ fontSize: 12, color: "var(--accent-primary, #FF9933)", cursor: "pointer", fontWeight: 600 }}>
@@ -225,7 +225,7 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, padding: "0 16px 16px", overflowX: "auto" }}>
+        <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4 pb-4 overflow-x-auto sm:overflow-x-visible scroll-touch">
           {places.map((place) => (
             <PlaceCard key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
           ))}
@@ -239,10 +239,10 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "4px 16px 10px",
+            padding: "8px 16px 12px",
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
             {t.nearbyEvents}
           </div>
           <div 
@@ -253,41 +253,26 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
           </div>
         </div>
 
-        <div style={{ 
-          display: "flex", 
-          gap: 10, 
-          padding: "0 16px 20px", 
-          flexDirection: showAllEvents ? "column" : "row",
-          overflowX: showAllEvents ? "visible" : "auto"
-        }}>
-          {(showAllEvents ? events : events.slice(0, 2)).map((ev) => (
+        <div className={`flex sm:grid ${showAllEvents ? "flex-col sm:grid-cols-2 md:grid-cols-3" : "sm:grid-cols-2 md:grid-cols-3"} gap-3 sm:gap-4 px-4 pb-6 overflow-x-auto sm:overflow-x-visible scroll-touch`}>
+          {(showAllEvents ? events : events.slice(0, 4)).map((ev) => (
             <div
               key={ev.id}
               onClick={() => setSelectedEvent(ev)}
-              style={{
-                flex: showAllEvents ? "none" : 1,
-                minWidth: showAllEvents ? "auto" : 160,
-                background: "var(--bg-card, #22222B)",
-                borderRadius: 14,
-                border: "1px solid var(--border-color, rgba(212,175,55,0.2))",
-                padding: "11px 13px",
-                cursor: "pointer",
-                marginBottom: showAllEvents ? 8 : 0,
-                boxShadow: "var(--card-shadow, 0 4px 12px rgba(0,0,0,0.3))",
-              }}
+              className="w-[180px] sm:w-auto flex-shrink-0 sm:flex-shrink rounded-2xl p-3 sm:p-4 border border-[var(--border-color,rgba(212,175,55,0.2))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_12px_rgba(0,0,0,0.3))] cursor-pointer hover:border-[var(--accent-primary)] transition-all"
             >
               <div
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
                   color: "var(--accent-primary, #FF9933)",
-                  marginBottom: 3,
+                  marginBottom: 4,
+                  letterSpacing: "0.5px",
                 }}
               >
                 {ev.date}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{ev.name}</div>
-              <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 2 }}>{ev.desc}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{ev.name}</div>
+              <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 3, lineHeight: 1.4 }}>{ev.desc}</div>
             </div>
           ))}
         </div>

@@ -12,30 +12,13 @@ const PlaceCard = memo(function PlaceCard({ place, onClick, userLocation, userLa
   return (
     <div
       onClick={() => onClick(place)}
-      style={{
-        width: 156,
-        flexShrink: 0,
-        borderRadius: 14,
-        overflow: "hidden",
-        border: "1px solid var(--border-color, #EDE8DF)",
-        background: "var(--bg-card, #fff)",
-        boxShadow: "var(--card-shadow, 0 4px 14px rgba(0,0,0,0.06))",
-        cursor: "pointer",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-      }}
+      className="w-[160px] sm:w-auto flex-shrink-0 sm:flex-shrink rounded-2xl overflow-hidden border border-[var(--border-color,rgba(212,175,55,0.25))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_14px_rgba(0,0,0,0.12))] cursor-pointer hover:scale-[1.02] transition-transform duration-200"
     >
       {/* Thumbnail */}
       <div
+        className="w-full h-[98px] sm:h-[135px] relative overflow-hidden flex items-center justify-center text-4xl"
         style={{
-          width: "100%",
-          height: 92,
           background: place.bgColor || "var(--bg-elevated, #2A2A36)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 36,
-          position: "relative",
-          overflow: "hidden",
         }}
       >
         {place.image ? (
@@ -56,7 +39,7 @@ const PlaceCard = memo(function PlaceCard({ place, onClick, userLocation, userLa
             display: place.image ? "none" : "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 32,
+            fontSize: 34,
           }}
         >
           {place.emoji || "📍"}
@@ -64,12 +47,12 @@ const PlaceCard = memo(function PlaceCard({ place, onClick, userLocation, userLa
       </div>
 
       {/* Info */}
-      <div style={{ padding: "8px 10px 10px" }}>
+      <div style={{ padding: "10px 12px 12px" }}>
         <div
           style={{
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 700,
-            color: "var(--text-main, #1C1412)",
+            color: "var(--text-main, #F5F5F7)",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -77,16 +60,16 @@ const PlaceCard = memo(function PlaceCard({ place, onClick, userLocation, userLa
         >
           {["Hindi", "Marathi", "Sanskrit", "Gujarati"].includes(userLanguage) && place.name_mr ? place.name_mr : place.name}
         </div>
-        <div style={{ fontSize: 11, color: "var(--text-sub, #6B5B52)", marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 3 }}>
           ⭐ {place.rating?.toFixed(1) || "4.8"} · {formatDistance(dynamicDistance)}
         </div>
         <div
           style={{
             display: "inline-block",
-            marginTop: 5,
+            marginTop: 6,
             fontSize: 10,
             fontWeight: 600,
-            padding: "2px 7px",
+            padding: "2px 8px",
             borderRadius: 10,
             background: tagStyle.bg,
             color: tagStyle.color,

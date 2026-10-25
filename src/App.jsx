@@ -107,27 +107,25 @@ function MainApp() {
 
   return (
     <div 
-      className="flex justify-center items-center min-h-screen p-0 sm:py-4 transition-colors duration-300"
+      className="min-h-screen w-full flex flex-col transition-colors duration-300 overflow-x-hidden"
       style={{
-        background: "radial-gradient(ellipse at 50% 20%, #2E1810 0%, #1A0E08 50%, #0C0704 100%)",
-        minHeight: "100vh",
-        width: "100vw",
+        background: "var(--bg-primary, #0E0E10)",
+        color: "var(--text-main, #F5F5F7)",
+        fontFamily: "var(--font-body, 'Inter', sans-serif)",
       }}
     >
-      <div
-        className="relative flex flex-col w-full h-[100dvh] sm:h-[94vh] sm:max-h-[880px] sm:max-w-[430px] sm:rounded-[36px] sm:border-2 overflow-hidden shadow-2xl transition-all duration-300"
+      {/* Universal Responsive Shell: 100% on iOS & Android, wide & expansive on Web */}
+      <div 
+        className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto flex-1 flex flex-col relative h-[100dvh] sm:border-x sm:border-[var(--border-subtle,rgba(212,175,55,0.18))] sm:shadow-2xl overflow-hidden"
         style={{
           background: "var(--bg-primary, #0E0E10)",
-          borderColor: "var(--border-color, rgba(212,175,55,0.35))",
-          boxShadow: "0 25px 65px rgba(0,0,0,0.75), 0 0 50px rgba(255,153,51,0.15)",
-          fontFamily: "var(--font-body, 'Inter', sans-serif)",
         }}
       >
-        {/* Screen Content Container with reliable flex-1 and min-h-0 */}
-        <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden" style={{ background: "var(--bg-primary, #0E0E10)" }}>
+        {/* Screen Content Container with reliable flex-1, min-h-0 and iOS momentum scrolling */}
+        <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden scroll-touch" style={{ background: "var(--bg-primary, #0E0E10)" }}>
           <Suspense fallback={
             <div style={{ background: "var(--bg-primary, #0E0E10)", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 700, fontSize: 13 }}>
+              <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 700, fontSize: 14 }}>
                 🕉️ Loading Ujjain Explorer...
               </div>
             </div>
@@ -137,13 +135,15 @@ function MainApp() {
 
           {/* Auth Modal Overlay */}
           {isAuthModalOpen && (
-            <div className="absolute inset-0 z-50" style={{ background: "var(--bg-surface, #18181D)" }}>
-              <AuthScreen
-                onAuthSuccess={handleAuthSuccess}
-                onClose={() => setIsAuthModalOpen(false)}
-                userLanguage={userLanguage}
-                setUserLanguage={setUserLanguage}
-              />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+              <div className="w-full max-w-md">
+                <AuthScreen
+                  onAuthSuccess={handleAuthSuccess}
+                  onClose={() => setIsAuthModalOpen(false)}
+                  userLanguage={userLanguage}
+                  setUserLanguage={setUserLanguage}
+                />
+              </div>
             </div>
           )}
         </div>

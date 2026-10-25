@@ -471,9 +471,11 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
                 <div style={{ fontSize: 13, color: "var(--text-muted, #A1A1AF)", marginTop: 6 }}>{t.saveSpotsMsg}</div>
               </div>
             ) : (
-              savedPlaces.map((place) => (
-                <PlaceListItem key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} />
-              ))
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 p-2 sm:p-4">
+                {savedPlaces.map((place) => (
+                  <PlaceListItem key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} />
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -489,13 +491,15 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
                 </div>
               </div>
             ) : (
-              <div>
-                <div style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: "var(--accent-primary, #FF9933)", background: "rgba(255,153,51,0.12)" }}>
+              <div className="p-2 sm:p-4">
+                <div style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: "var(--accent-primary, #FF9933)", background: "rgba(255,153,51,0.12)", borderRadius: 12, marginBottom: 10 }}>
                   {t.contributionsMsg}
                 </div>
-                {discoveredPlaces.map((place) => (
-                  <PlaceListItem key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} />
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  {discoveredPlaces.map((place) => (
+                    <PlaceListItem key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -504,7 +508,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
         {activeSubTab === "activity" && (
           <div style={{ padding: "20px 16px" }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 16 }}>{t.earnedBadges}</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: "🏰", name: userLanguage === "Hindi" ? "इतिहास प्रेमी" : userLanguage === "Marathi" ? "इतिहास प्रेमी" : "History Buff", active: stats.totalPoints > 200 },
                 { icon: "🍽️", name: userLanguage === "Hindi" ? "प्रसाद एवं खानपान" : userLanguage === "Marathi" ? "खवय्ये" : "Foodie", active: stats.totalPoints > 400 },

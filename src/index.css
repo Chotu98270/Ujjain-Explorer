@@ -116,11 +116,26 @@
   padding: 0;
 }
 
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: var(--font-body, 'Inter', sans-serif);
   background: var(--bg-primary, #0E0E10);
   color: var(--text-main, #F5F5F7);
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* iOS momentum touch scrolling */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Scrollbar hidden on webkit */

@@ -235,9 +235,11 @@ export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userL
             <div>{t.noPlaces}</div>
           </div>
         ) : (
-          filteredAndSortedPlaces.map((place) => (
-            <PlaceListItem key={place.id || place.name} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 p-2 sm:p-4">
+            {filteredAndSortedPlaces.map((place) => (
+              <PlaceListItem key={place.id || place.name} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
+            ))}
+          </div>
         )}
       </div>
 

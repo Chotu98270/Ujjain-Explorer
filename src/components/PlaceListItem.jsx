@@ -13,15 +13,7 @@ const PlaceListItem = memo(function PlaceListItem({ place, onClick, userLocation
   return (
     <div
       onClick={() => onClick(place)}
-      style={{
-        display: "flex",
-        gap: 12,
-        padding: "12px 16px",
-        borderBottom: "1px solid var(--border-subtle, #2E2E3C)",
-        background: "var(--bg-card, #22222B)",
-        cursor: "pointer",
-        transition: "background 0.15s ease",
-      }}
+      className="flex gap-3 p-3 rounded-xl sm:rounded-2xl border border-[var(--border-subtle,#2E2E3C)] bg-[var(--bg-card,#22222B)] hover:bg-[var(--bg-elevated,#2A2A36)] hover:border-[var(--border-color,rgba(212,175,55,0.3))] transition-all cursor-pointer"
     >
       {/* Thumbnail */}
       <div
