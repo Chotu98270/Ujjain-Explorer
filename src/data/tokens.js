@@ -25,6 +25,14 @@ export const colors = {
   stoneDark: "#ECE5D8",
   ink: "#1C1412",
   inkMuted: "#6B5B52",
+
+  // Backward compatibility aliases
+  wadaRed: "#D9531E",
+  wadaRedLight: "#FDF2EC",
+  paithaniGold: "#C88617",
+  paithaniGoldLight: "#FDF6EA",
+  paithaniSaffron: "#D9531E",
+  peshwaPurple: "#1B4965",
 };
 
 export const categoryColors = {

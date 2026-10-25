@@ -58,9 +58,9 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
         style={{
           background: "var(--hero-gradient, linear-gradient(135deg, #1C0F08 0%, #0E0E10 100%))",
           borderBottom: "1px solid var(--hero-border, rgba(255,153,51,0.25))",
-          padding: "16px 20px 24px",
+          padding: "16px 20px 28px",
           position: "relative",
-          zIndex: 30,
+          zIndex: 10,
           transition: "background 0.3s ease",
         }}
       >
@@ -118,28 +118,27 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
         </div>
       </div>
 
-      {/* Themed Search Bar */}
-      <div style={{ background: "transparent", padding: "0 16px 6px", position: "relative", zIndex: 25 }}>
+      {/* Themed Search Bar - Floating without cutting */}
+      <div style={{ background: "transparent", padding: "0 16px", position: "relative", zIndex: 40, marginTop: -20 }}>
         <div
           onClick={onSearchClick}
           style={{
-            marginTop: -16,
             background: "var(--bg-card, #22222B)",
             borderRadius: 14,
             border: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
-            padding: "10px 14px",
+            padding: "12px 16px",
             display: "flex",
             alignItems: "center",
             gap: 10,
-            position: "relative",
             cursor: "pointer",
-            boxShadow: "var(--card-shadow, 0 6px 20px rgba(0,0,0,0.5))",
-            height: 46,
+            boxShadow: "var(--card-shadow, 0 8px 24px rgba(0,0,0,0.45))",
+            minHeight: 50,
             boxSizing: "border-box",
+            width: "100%",
           }}
         >
-          <span style={{ fontSize: 16, color: "var(--accent-primary, #FF9933)", flexShrink: 0 }}>🔍</span>
-          <span style={{ fontSize: 13, color: "var(--text-sub, #A1A1AF)", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <span style={{ fontSize: 17, color: "var(--accent-primary, #FF9933)", flexShrink: 0 }}>🔍</span>
+          <span style={{ fontSize: 13.5, color: "var(--text-sub, #A1A1AF)", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: "20px" }}>
             {t.searchPlaceholder}
           </span>
           <span 
@@ -147,7 +146,7 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
               e.stopPropagation();
               onSearchClick({ showFilters: true });
             }}
-            style={{ fontSize: 16, color: "var(--accent-primary, #FF9933)", flexShrink: 0 }}
+            style={{ fontSize: 17, color: "var(--accent-primary, #FF9933)", flexShrink: 0, padding: "2px" }}
           >
             ⚙️
           </span>

@@ -15,7 +15,7 @@ const languageOptions = [
   { code: "Telugu", label: "తెలుగు (Telugu)" },
   { code: "Kannada", label: "ಕನ್ನಡ (Kannada)" },
   { code: "Bengali", label: "বাংলা (Bengali)" },
-  { code: "Punjabi", label: "ਪੰਜਾਬી (Punjabi)" },
+  { code: "Punjabi", label: "ਪੰਜਾਬੀ (Punjabi)" },
   { code: "Malayalam", label: "മലയാളം (Malayalam)" },
   { code: "Odia", label: "ଓଡ଼ିଆ (Odia)" },
   { code: "Urdu", label: "اردو (Urdu)" },
@@ -26,9 +26,19 @@ const languageOptions = [
 
 export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguage, setUserLanguage, onLogout, onOpenAuth, user }) {
   const token = localStorage.getItem("pune_auth_token");
-  // User Personalization State
-  const [userName, setUserName] = useState(() => localStorage.getItem("pune_user_name") || (token ? "Yatri" : (userLanguage === "Hindi" ? "अवन्तिका यात्री" : "Ujjain Yatri")));
-  const [userBio, setUserBio] = useState(() => localStorage.getItem("pune_user_bio") || (token ? "Mahakal Pilgrim · Ujjain Explorer" : (userLanguage === "Hindi" ? "महाकाल की नगरी अवन्तिका दर्शन" : "Exploring the Sacred City of Mahakal")));
+
+  // User Personalization State with automatic prop/storage synchronization
+  const [userName, setUserName] = useState(() => {
+    if (user?.name) return user.name;
+    const stored = localStorage.getItem("pune_user_name");
+    if (stored) return stored;
+    return token ? "Yatri" : (userLanguage === "Hindi" ? "अवन्तिका यात्री" : "Ujjain Yatri");
+  });
+
+  const [userBio, setUserBio] = useState(() => {
+    return localStorage.getItem("pune_user_bio") || (token ? "Mahakal Pilgrim · Ujjain Explorer" : (userLanguage === "Hindi" ? "महाकाल की नगरी अवन्तिका दर्शन 🕉️" : "Exploring the Sacred City of Mahakal 🕉️"));
+  });
+
   const [userAvatar, setUserAvatar] = useState(() => localStorage.getItem("pune_user_avatar") || null);
   
   const [savedPlaces, setSavedPlaces] = useState([]);
@@ -46,6 +56,26 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
 
   const t = translations[userLanguage] || translations.English;
 
+  // Synchronize state when user prop updates
+  useEffect(() => {
+    if (user?.name) {
+      setUserName(user.name);
+    } else {
+      const stored = localStorage.getItem("pune_user_name");
+      if (stored) {
+        setUserName(stored);
+      } else {
+        setUserName(userLanguage === "Hindi" ? "अवन्तिका यात्री" : "Ujjain Yatri");
+      }
+    }
+
+    const storedBio = localStorage.getItem("pune_user_bio");
+    if (storedBio) setUserBio(storedBio);
+
+    const storedAvatar = localStorage.getItem("pune_user_avatar");
+    if (storedAvatar) setUserAvatar(storedAvatar);
+  }, [user, userLanguage]);
+
   useEffect(() => {
     const loadProfileData = async () => {
       setLoading(true);
@@ -56,9 +86,9 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
           fetchPlaces({ isDiscovered: true }),
           authToken ? fetchUserStats().catch(() => ({ totalPoints: 0, savedCount: 0, completedStops: 0, discoveredCount: 0 })) : Promise.resolve({ totalPoints: 0, savedCount: 0, completedStops: 0, discoveredCount: 0 })
         ]);
-        setSavedPlaces(savedData);
-        setDiscoveredPlaces(discoveredData);
-        setStats(statsData);
+        setSavedPlaces(savedData || []);
+        setDiscoveredPlaces(discoveredData || []);
+        setStats(statsData || { totalPoints: 0, savedCount: 0, completedStops: 0, discoveredCount: 0 });
       } catch (error) {
         console.error("Failed to load profile data:", error);
       } finally {
@@ -103,12 +133,10 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
     }
   };
 
-
-
   if (loading) {
     return (
-      <div style={{ background: "#FBF8F3", minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ color: colors.wadaRed, fontWeight: 600 }}>
+      <div style={{ background: "var(--bg-primary, #0E0E10)", minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "var(--accent-primary, #FF9933)", fontWeight: 700, fontSize: 14 }}>
           {userLanguage === "Marathi" ? "प्रोफाइल लोड होत आहे..." :
            userLanguage === "Hindi" ? "प्रोफ़ाइल लोड हो रही है..." :
            userLanguage === "Gujarati" ? "પ્રોફાઇલ લોડ થઈ રહી છે..." :
@@ -119,46 +147,70 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
   }
 
   return (
-    <div style={{ background: "#FBF8F3", height: "100%", overflowY: "auto", paddingBottom: 80, fontFamily: 'Mukta', position: "relative" }}>
+    <div style={{ 
+      background: "var(--bg-primary, #0E0E10)", 
+      height: "100%", 
+      overflowY: "auto", 
+      paddingBottom: 84, 
+      fontFamily: "var(--font-body, 'Mukta', sans-serif)", 
+      position: "relative",
+      color: "var(--text-main, #F5F5F7)"
+    }}>
       <StatusBar light />
 
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div style={{
-          position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 100,
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 999,
           display: "flex", alignItems: "center", justifyContent: "center", padding: 20
         }}>
-          <div style={{ background: "#fff", width: "100%", borderRadius: 20, padding: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: colors.ink, marginBottom: 20 }}>{t.editProfileModal}</div>
+          <div style={{ 
+            background: "var(--bg-surface, #18181D)", 
+            width: "100%", 
+            maxWidth: 400, 
+            borderRadius: 20, 
+            padding: 24, 
+            boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+            border: "1px solid var(--border-color, rgba(212,175,55,0.3))"
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 20 }}>
+              {t.editProfileModal}
+            </div>
             
             {/* Avatar Edit Section */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
               <label style={{ position: "relative", cursor: "pointer" }}>
                 <div
                   style={{
-                    width: 80,
-                    height: 80,
+                    width: 84,
+                    height: 84,
                     borderRadius: "50%",
-                    background: "#f0f0f0",
+                    background: "var(--bg-card, #22222B)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: 40,
-                    border: `3px solid ${colors.paithaniGold}`,
+                    border: "3.5px solid var(--accent-secondary, #D4AF37)",
                     overflow: "hidden",
-                    backgroundImage: tempAvatar ? `url(${tempAvatar})` : "none",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    position: "relative",
                   }}
                 >
-                  {!tempAvatar && "👤"}
+                  {tempAvatar ? (
+                    <img 
+                      src={tempAvatar} 
+                      alt="Avatar Preview" 
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    />
+                  ) : (
+                    <span>👤</span>
+                  )}
                 </div>
                 <div style={{
                   position: "absolute", bottom: 0, right: 0,
                   width: 28, height: 28, borderRadius: "50%",
-                  background: colors.wadaRed, color: "#fff",
+                  background: "var(--accent-primary, #FF9933)", color: "#0E0E10",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, border: "2px solid #fff"
+                  fontSize: 14, border: "2px solid #fff", fontWeight: 700
                 }}>
                   📷
                 </div>
@@ -169,45 +221,51 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
                   style={{ display: "none" }}
                 />
               </label>
-              <div style={{ fontSize: 11, color: colors.inkMuted, marginTop: 8 }}>{t.changePhoto}</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted, #A1A1AF)", marginTop: 8 }}>{t.changePhoto}</div>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: colors.inkMuted, marginBottom: 6 }}>{t.displayName}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", marginBottom: 6 }}>{t.displayName}</div>
               <input 
                 value={tempName}
                 onChange={(e) => setTempName(e.target.value)}
                 style={{ 
-                  width: "100%", padding: "12px", borderRadius: 10, border: `1px solid ${colors.stoneDark}`,
-                  fontSize: 14, outline: "none"
+                  width: "100%", padding: "12px", borderRadius: 10, 
+                  border: "1px solid var(--border-subtle, #2E2E3C)",
+                  background: "var(--bg-card, #22222B)", color: "var(--text-main, #F5F5F7)",
+                  fontSize: 14, outline: "none", boxSizing: "border-box"
                 }}
               />
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: colors.inkMuted, marginBottom: 6 }}>{t.bio}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", marginBottom: 6 }}>{t.bio}</div>
               <input 
                 value={tempBio}
                 onChange={(e) => setTempBio(e.target.value)}
                 style={{ 
-                  width: "100%", padding: "12px", borderRadius: 10, border: `1px solid ${colors.stoneDark}`,
-                  fontSize: 14, outline: "none"
+                  width: "100%", padding: "12px", borderRadius: 10, 
+                  border: "1px solid var(--border-subtle, #2E2E3C)",
+                  background: "var(--bg-card, #22222B)", color: "var(--text-main, #F5F5F7)",
+                  fontSize: 14, outline: "none", boxSizing: "border-box"
                 }}
               />
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: colors.inkMuted, marginBottom: 6 }}>{t.language}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", marginBottom: 6 }}>{t.language}</div>
               <select
                 value={tempLanguage}
                 onChange={(e) => setTempLanguage(e.target.value)}
                 style={{ 
-                  width: "100%", padding: "12px", borderRadius: 10, border: `1px solid ${colors.stoneDark}`,
-                  fontSize: 14, outline: "none", background: "#fff", cursor: "pointer"
+                  width: "100%", padding: "12px", borderRadius: 10, 
+                  border: "1px solid var(--border-subtle, #2E2E3C)",
+                  background: "var(--bg-card, #22222B)", color: "var(--text-main, #F5F5F7)",
+                  fontSize: 14, outline: "none", cursor: "pointer", boxSizing: "border-box"
                 }}
               >
                 {languageOptions.map(lang => (
-                  <option key={lang.code} value={lang.code}>
+                  <option key={lang.code} value={lang.code} style={{ background: "#18181D", color: "#F5F5F7" }}>
                     {lang.label}
                   </option>
                 ))}
@@ -217,13 +275,22 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             <div style={{ display: "flex", gap: 12 }}>
               <button 
                 onClick={() => setIsEditModalOpen(false)}
-                style={{ flex: 1, padding: "12px", borderRadius: 12, border: `1px solid ${colors.stoneDark}`, background: "none", fontWeight: 600, cursor: "pointer" }}
+                style={{ 
+                  flex: 1, padding: "12px", borderRadius: 12, 
+                  border: "1px solid var(--border-subtle, #2E2E3C)", 
+                  background: "transparent", color: "var(--text-sub, #A1A1AF)",
+                  fontWeight: 600, cursor: "pointer" 
+                }}
               >
                 {t.cancel}
               </button>
               <button 
                 onClick={handleSaveProfile}
-                style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none", background: colors.wadaRed, color: "#fff", fontWeight: 600, cursor: "pointer" }}
+                style={{ 
+                  flex: 1, padding: "12px", borderRadius: 12, border: "none", 
+                  background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))", 
+                  color: "var(--cta-text, #0E0E10)", fontWeight: 700, cursor: "pointer" 
+                }}
               >
                 {t.saveChanges}
               </button>
@@ -232,55 +299,102 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
         </div>
       )}
 
-      {/* Profile Header */}
+      {/* Profile Header Banner */}
       <div
         style={{
-          background: colors.wadaRed,
-          padding: "32px 16px 40px",
+          background: "var(--hero-gradient, linear-gradient(145deg, #1C0F08 0%, #0E0E10 100%))",
+          borderBottom: "1px solid var(--hero-border, rgba(255,153,51,0.25))",
+          padding: "36px 16px 44px",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+        {/* Subtle decorative aura */}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
           <div
             style={{
-              width: 88,
-              height: 88,
+              position: "absolute", top: -20, right: -20,
+              width: 140, height: 140, borderRadius: "50%",
+              background: "rgba(255,153,51,0.12)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute", bottom: -30, left: -20,
+              width: 120, height: 120, borderRadius: "50%",
+              background: "rgba(212,175,55,0.08)",
+            }}
+          />
+        </div>
+
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+          {/* Profile Avatar Container with crisp Vedic Gold border */}
+          <div
+            style={{
+              width: 90,
+              height: 90,
               borderRadius: "50%",
-              background: "#fff",
+              background: "var(--bg-card, #22222B)",
               margin: "0 auto 14px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 44,
-              border: `4px solid ${colors.paithaniGold}`,
-              boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
+              fontSize: 42,
+              border: "3.5px solid var(--accent-secondary, #D4AF37)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
               overflow: "hidden",
-              backgroundImage: userAvatar ? `url(${userAvatar})` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              position: "relative",
             }}
           >
-            {!userAvatar && "👤"}
+            {userAvatar ? (
+              <img
+                src={userAvatar}
+                alt={userName}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={() => setUserAvatar(null)}
+              />
+            ) : (
+              <span style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}>👤</span>
+            )}
           </div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>{userName}</div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 4 }}>
+
+          {/* High-visibility Username and Bio */}
+          <div style={{ 
+            fontSize: 22, 
+            fontWeight: 800, 
+            color: "#FFFFFF", 
+            letterSpacing: "0.3px",
+            fontFamily: "var(--font-heading, serif)",
+            textShadow: "0 2px 8px rgba(0,0,0,0.5)"
+          }}>
+            {userName}
+          </div>
+          
+          <div style={{ 
+            fontSize: 13, 
+            color: "rgba(255,255,255,0.85)", 
+            marginTop: 4,
+            maxWidth: 300,
+            marginInline: "auto",
+            lineHeight: "18px"
+          }}>
             {userBio}
           </div>
           
+          {/* Pilgrim Level Badge */}
           <div style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
             marginTop: 16,
-            background: colors.paithaniSaffron,
-            padding: "6px 14px",
+            background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
+            padding: "6px 16px",
             borderRadius: 20,
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            border: "1px solid rgba(255,255,255,0.3)"
+            boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+            border: "1px solid rgba(255,255,255,0.35)"
           }}>
             <span style={{ fontSize: 14 }}>{currentLevel.icon}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", letterSpacing: 0.5 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--cta-text, #0E0E10)", letterSpacing: 0.5 }}>
               {t.punekarLevel}: {currentLevel.title}
             </span>
           </div>
@@ -289,40 +403,43 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
 
       {/* Stats & Rank Card */}
       <div style={{ 
-        margin: "-24px 16px 20px", 
-        background: "#fff", 
+        margin: "-22px 16px 20px", 
+        background: "var(--bg-card, #22222B)", 
         borderRadius: 16, 
         padding: "16px",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+        boxShadow: "var(--card-shadow, 0 8px 25px rgba(0,0,0,0.3))",
+        border: "1px solid var(--border-color, rgba(212,175,55,0.22))",
         position: "relative",
         zIndex: 2
       }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, borderBottom: `1px solid ${colors.stone}`, paddingBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, borderBottom: "1px solid var(--border-subtle, #2E2E3C)", paddingBottom: 16 }}>
           {[
-            { label: t.saved, val: stats.savedCount, color: colors.wadaRed },
-            { label: t.points, val: stats.totalPoints, color: colors.paithaniSaffron },
-            { label: t.stops, val: stats.completedStops, color: colors.peshwaPurple },
+            { label: t.saved, val: stats.savedCount, color: "var(--accent-primary, #FF9933)" },
+            { label: t.points, val: stats.totalPoints, color: "var(--accent-secondary, #D4AF37)" },
+            { label: t.stops, val: stats.completedStops, color: "#4EA8DE" },
           ].map(stat => (
             <div key={stat.label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: stat.color }}>{stat.val}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: colors.inkMuted, textTransform: "uppercase" }}>{stat.label}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: stat.color }}>{stat.val}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", textTransform: "uppercase" }}>{stat.label}</div>
             </div>
           ))}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: colors.wadaRedLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🏆</div>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,153,51,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🏆</div>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: colors.ink }}>{t.communityRank}</div>
-              <div style={{ fontSize: 10, color: colors.inkMuted }}>{userLanguage === "Marathi" ? `${stats.totalPoints} गुणांवर आधारित` : `Based on ${stats.totalPoints} points`}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{t.communityRank}</div>
+              <div style={{ fontSize: 10, color: "var(--text-muted, #A1A1AF)" }}>
+                {userLanguage === "Marathi" ? `${stats.totalPoints} गुणांवर आधारित` : `Based on ${stats.totalPoints} points`}
+              </div>
             </div>
           </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: colors.wadaRed }}>#{currentLevel.rank} {t.rankInPune}</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--accent-primary, #FF9933)" }}>#{currentLevel.rank} {t.rankInPune}</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 20, padding: "0 20px", borderBottom: `1px solid ${colors.stoneDark}`, overflowX: "auto" }}>
+      <div style={{ display: "flex", gap: 20, padding: "0 20px", borderBottom: "1px solid var(--border-subtle, #2E2E3C)", overflowX: "auto" }}>
         {[
           { id: "bookmarks", label: t.saved },
           { id: "discoveries", label: t.discoveries },
@@ -333,8 +450,8 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             onClick={() => setActiveTab(tab.id)}
             style={{ 
               padding: "12px 4px", fontSize: 13, fontWeight: 700, border: "none", background: "none", cursor: "pointer",
-              color: activeSubTab === tab.id ? colors.wadaRed : colors.inkMuted,
-              borderBottom: activeSubTab === tab.id ? `3px solid ${colors.wadaRed}` : "3px solid transparent",
+              color: activeSubTab === tab.id ? "var(--accent-primary, #FF9933)" : "var(--text-muted, #A1A1AF)",
+              borderBottom: activeSubTab === tab.id ? "3px solid var(--accent-primary, #FF9933)" : "3px solid transparent",
               whiteSpace: "nowrap"
             }}
           >
@@ -344,14 +461,14 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
       </div>
 
       {/* Tab Content */}
-      <div style={{ background: "#fff", flex: 1 }}>
+      <div style={{ background: "transparent", flex: 1, minHeight: 180 }}>
         {activeSubTab === "bookmarks" && (
           <div>
             {savedPlaces.length === 0 ? (
               <div style={{ padding: "48px 16px", textAlign: "center" }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🔖</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: colors.ink }}>{t.noTreasureMsg}</div>
-                <div style={{ fontSize: 13, color: colors.inkMuted, marginTop: 6 }}>{t.saveSpotsMsg}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{t.noTreasureMsg}</div>
+                <div style={{ fontSize: 13, color: "var(--text-muted, #A1A1AF)", marginTop: 6 }}>{t.saveSpotsMsg}</div>
               </div>
             ) : (
               savedPlaces.map((place) => (
@@ -366,14 +483,14 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             {discoveredPlaces.length === 0 ? (
               <div style={{ padding: "48px 16px", textAlign: "center" }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🔎</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: colors.ink }}>{t.noDiscoveriesMsg}</div>
-                <div style={{ fontSize: 13, color: colors.inkMuted, marginTop: 6, padding: "0 40px" }}>
-                  {userLanguage === "Marathi" ? "पुणे मार्गदर्शिका मध्ये योगदान देण्यासाठी एक्सप्लोर टॅबमध्ये नवीन ठिकाणे शोधा!" : "Search for new places in the Explore tab to contribute to the Pune Guide!"}
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{t.noDiscoveriesMsg}</div>
+                <div style={{ fontSize: 13, color: "var(--text-muted, #A1A1AF)", marginTop: 6, padding: "0 40px" }}>
+                  {userLanguage === "Hindi" ? "उज्जैन मार्गदर्शिका में योगदान देने के लिए एक्सप्लोर टैब में नए स्थान खोजें!" : userLanguage === "Marathi" ? "पुणे मार्गदर्शिका मध्ये योगदान देण्यासाठी एक्सप्लोर टॅबमध्ये नवीन ठिकाणे शोधा!" : "Search for new places in the Explore tab to contribute to the Ujjain Guide!"}
                 </div>
               </div>
             ) : (
               <div>
-                <div style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: colors.wadaRed, background: colors.wadaRedLight }}>
+                <div style={{ padding: "12px 16px", fontSize: 11, fontWeight: 700, color: "var(--accent-primary, #FF9933)", background: "rgba(255,153,51,0.12)" }}>
                   {t.contributionsMsg}
                 </div>
                 {discoveredPlaces.map((place) => (
@@ -386,35 +503,35 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
 
         {activeSubTab === "activity" && (
           <div style={{ padding: "20px 16px" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: colors.ink, marginBottom: 16 }}>{t.earnedBadges}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 16 }}>{t.earnedBadges}</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {[
-                { icon: "🏰", name: userLanguage === "Marathi" ? "इतिहास प्रेमी" : "History Buff", active: stats.totalPoints > 200 },
-                { icon: "🍽️", name: userLanguage === "Marathi" ? "खवय्ये" : "Foodie", active: stats.totalPoints > 400 },
-                { icon: "⛩️", name: userLanguage === "Marathi" ? "भक्त" : "Devotee", active: stats.totalPoints > 100 },
-                { icon: "🥾", name: userLanguage === "Marathi" ? "गिर्यारोहक" : "Trekker", active: stats.totalPoints > 800 },
+                { icon: "🏰", name: userLanguage === "Hindi" ? "इतिहास प्रेमी" : userLanguage === "Marathi" ? "इतिहास प्रेमी" : "History Buff", active: stats.totalPoints > 200 },
+                { icon: "🍽️", name: userLanguage === "Hindi" ? "प्रसाद एवं खानपान" : userLanguage === "Marathi" ? "खवय्ये" : "Foodie", active: stats.totalPoints > 400 },
+                { icon: "⛩️", name: userLanguage === "Hindi" ? "महाकाल भक्त" : userLanguage === "Marathi" ? "भक्त" : "Devotee", active: stats.totalPoints > 100 },
+                { icon: "🥾", name: userLanguage === "Hindi" ? "घाट पदयात्री" : userLanguage === "Marathi" ? "गिर्यारोहक" : "Trekker", active: stats.totalPoints > 800 },
               ].map(badge => (
                 <div key={badge.name} style={{ 
-                  background: badge.active ? colors.stone : "#f9f9f9", 
-                  borderRadius: 12, padding: "12px", border: `1px solid ${badge.active ? colors.stoneDark : "#eee"}`,
+                  background: badge.active ? "var(--bg-card, #22222B)" : "var(--bg-surface, #18181D)", 
+                  borderRadius: 12, padding: "12px", border: `1px solid ${badge.active ? "var(--border-color, rgba(212,175,55,0.3))" : "var(--border-subtle, #2E2E3C)"}`,
                   display: "flex", alignItems: "center", gap: 10,
-                  opacity: badge.active ? 1 : 0.4
+                  opacity: badge.active ? 1 : 0.45
                 }}>
                   <div style={{ fontSize: 24, filter: badge.active ? "none" : "grayscale(1)" }}>{badge.icon}</div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: colors.ink }}>{badge.name}</div>
-                    <div style={{ fontSize: 10, color: colors.inkMuted }}>{badge.active ? t.unlocked : t.locked}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{badge.name}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted, #A1A1AF)" }}>{badge.active ? t.unlocked : t.locked}</div>
                   </div>
                 </div>
               ))}
             </div>
             
             <div style={{ 
-              marginTop: 24, padding: "16px", borderRadius: 12, background: colors.wadaRedLight,
-              border: `1px dashed ${colors.wadaRed}`
+              marginTop: 24, padding: "16px", borderRadius: 12, background: "rgba(255,153,51,0.08)",
+              border: "1px dashed var(--accent-primary, #FF9933)"
             }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: colors.wadaRed }}>{t.pointsBreakdown}</div>
-              <div style={{ fontSize: 11, color: colors.inkMuted, marginTop: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent-primary, #FF9933)" }}>{t.pointsBreakdown}</div>
+              <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 6, lineHeight: 1.6 }}>
                 • {stats.savedCount} {t.placesSaved} (+{stats.savedCount * 10} {t.points})<br/>
                 • {stats.completedStops} {t.stopsCompleted} (+{stats.completedStops * 50} {t.points})<br/>
                 • {stats.discoveredCount} {t.newDiscoveries} (+{stats.discoveredCount * 100} {t.points})
@@ -425,7 +542,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "24px 16px 40px", textAlign: "center", background: "#FBF8F3" }}>
+      <div style={{ padding: "24px 16px 40px", textAlign: "center", background: "transparent" }}>
         {token ? (
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <button 
@@ -437,8 +554,8 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
                 setIsEditModalOpen(true);
               }}
               style={{ 
-                background: "none", border: `1px solid ${colors.stoneDark}`, borderRadius: 10,
-                padding: "8px 20px", fontSize: 12, fontWeight: 600, color: colors.inkMuted, cursor: "pointer"
+                background: "var(--bg-card, #22222B)", border: "1px solid var(--border-color, rgba(212,175,55,0.3))", borderRadius: 10,
+                padding: "8px 20px", fontSize: 12, fontWeight: 600, color: "var(--text-main, #F5F5F7)", cursor: "pointer"
               }}
             >
               {t.editProfile}
@@ -446,34 +563,37 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             <button 
               onClick={onLogout}
               style={{ 
-                background: "none", border: `1px solid ${colors.wadaRed}`, borderRadius: 10,
-                padding: "8px 20px", fontSize: 12, fontWeight: 600, color: colors.wadaRed, cursor: "pointer"
+                background: "rgba(231,76,60,0.1)", border: "1px solid rgba(231,76,60,0.4)", borderRadius: 10,
+                padding: "8px 20px", fontSize: 12, fontWeight: 600, color: "#E74C3C", cursor: "pointer"
               }}
             >
-              {userLanguage === "Marathi" ? "लॉगआउट" : "Logout"}
+              {userLanguage === "Marathi" ? "लॉगआउट" : userLanguage === "Hindi" ? "लॉगआउट" : "Logout"}
             </button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-            <p style={{ fontSize: 12, color: colors.inkMuted, maxWidth: 280, margin: "0 auto" }}>
-              {userLanguage === "Marathi" 
+            <p style={{ fontSize: 12, color: "var(--text-muted, #A1A1AF)", maxWidth: 280, margin: "0 auto" }}>
+              {userLanguage === "Hindi" 
+                ? "अपने दर्शन बिंदु और सहेजे गए पावन स्थल सुरक्षित रखने हेतु लॉगिन करें।"
+                : userLanguage === "Marathi" 
                 ? "आपले गुण आणि सेव्ह केलेली ठिकाणे सुरक्षित ठेवण्यासाठी लॉगिन करा." 
-                : "Log in or register to sync your bookmarks, record visited spots, and earn Punekar XP!"}
+                : "Log in or register to sync your bookmarks, record visited spots, and earn Yatri XP!"}
             </p>
             {onOpenAuth && (
               <button 
                 onClick={onOpenAuth}
                 style={{ 
-                  background: colors.wadaRed, border: "none", borderRadius: 12,
-                  padding: "10px 24px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(139, 58, 42, 0.2)"
+                  background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))", border: "none", borderRadius: 12,
+                  padding: "10px 24px", fontSize: 13, fontWeight: 700, color: "var(--cta-text, #0E0E10)", cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(255,153,51,0.25)"
                 }}
               >
-                {userLanguage === "Marathi" ? "लॉगिन / नोंदणी करा 🚩" : "Log In / Register 🚩"}
+                {userLanguage === "Hindi" ? "लॉगिन / यात्री पंजीकरण 🚩" : userLanguage === "Marathi" ? "लॉगिन / नोंदणी करा 🚩" : "Log In / Register 🚩"}
               </button>
             )}
           </div>
         )}
+
         {/* Visual Appearance & Theme Settings */}
         <div style={{ 
           marginTop: 20, 
@@ -498,10 +618,10 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
         <div style={{ 
           marginTop: 20, 
           padding: "16px 14px", 
-          background: "#fff", 
+          background: "var(--bg-card, #22222B)", 
           borderRadius: 14, 
-          border: `1px solid ${colors.stoneDark}`,
-          boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+          border: "1px solid var(--border-subtle, #2E2E3C)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
           textAlign: "center"
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 6 }}>
@@ -510,31 +630,31 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
               fontWeight: 700, 
               padding: "2px 8px", 
               borderRadius: 6, 
-              background: colors.wadaRedLight, 
-              color: colors.wadaRed,
+              background: "rgba(255,153,51,0.15)", 
+              color: "var(--accent-primary, #FF9933)",
               letterSpacing: "0.5px"
             }}>
-              {t.versionText || "Version 1.0.0"}
+              {t.versionText || "Release 1.1.0"}
             </span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: colors.ink }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
               Ujjain Explorer
             </span>
           </div>
 
-          <p style={{ fontSize: 11, color: colors.inkMuted, margin: "6px 0 10px", lineHeight: 1.4, maxWidth: 300, marginLeft: "auto", marginRight: "auto" }}>
+          <p style={{ fontSize: 11, color: "var(--text-muted, #A1A1AF)", margin: "6px 0 10px", lineHeight: 1.4, maxWidth: 300, marginLeft: "auto", marginRight: "auto" }}>
             {t.thankYouContributors}
           </p>
 
           <button
             onClick={() => setIsContributorsModalOpen(true)}
             style={{
-              background: colors.stone,
-              border: `1px solid ${colors.stoneDark}`,
+              background: "var(--bg-surface, #18181D)",
+              border: "1px solid var(--border-subtle, #2E2E3C)",
               borderRadius: 8,
               padding: "6px 14px",
               fontSize: 11,
               fontWeight: 600,
-              color: colors.wadaRed,
+              color: "var(--accent-primary, #FF9933)",
               cursor: "pointer",
               transition: "all 0.2s ease"
             }}
@@ -543,7 +663,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
           </button>
         </div>
 
-        <div style={{ fontSize: 10, color: colors.inkMuted, marginTop: 14 }}>
+        <div style={{ fontSize: 10, color: "var(--text-muted, #A1A1AF)", marginTop: 14 }}>
           {t.memberSince}
         </div>
       </div>
@@ -552,28 +672,39 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
       {isContributorsModalOpen && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9999,
-          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
+          background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
           display: "flex", alignItems: "center", justifyContent: "center", padding: 16
         }}>
           <div style={{
-            background: "#fff", borderRadius: 16, maxWidth: 440, width: "100%",
-            maxHeight: "85vh", overflowY: "auto", padding: 24, boxShadow: "0 10px 25px rgba(0,0,0,0.15)"
+            background: "var(--bg-surface, #18181D)", 
+            borderRadius: 16, 
+            maxWidth: 440, 
+            width: "100%",
+            maxHeight: "85vh", 
+            overflowY: "auto", 
+            padding: 24, 
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            border: "1px solid var(--border-color, rgba(212,175,55,0.3))"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
               <div>
-                <div style={{ display: "inline-block", fontSize: 10, fontWeight: 700, background: colors.paithaniGold, color: "#fff", padding: "2px 8px", borderRadius: 4, marginBottom: 6 }}>
+                <div style={{ 
+                  display: "inline-block", fontSize: 10, fontWeight: 700, 
+                  background: "var(--accent-primary, #FF9933)", color: "#0E0E10", 
+                  padding: "2px 8px", borderRadius: 4, marginBottom: 6 
+                }}>
                   RELEASE v1.1.0
                 </div>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: colors.ink }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
                   {t.contributorsModalTitle}
                 </h3>
-                <p style={{ margin: "4px 0 0", fontSize: 12, color: colors.inkMuted }}>
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--text-muted, #A1A1AF)" }}>
                   {t.contributorsModalSubtitle}
                 </p>
               </div>
               <button
                 onClick={() => setIsContributorsModalOpen(false)}
-                style={{ background: "none", border: "none", fontSize: 20, color: colors.inkMuted, cursor: "pointer", padding: "4px 8px" }}
+                style={{ background: "none", border: "none", fontSize: 20, color: "var(--text-muted, #A1A1AF)", cursor: "pointer", padding: "4px 8px" }}
               >
                 ✕
               </button>
@@ -582,45 +713,51 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             {/* Contributor Cards */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
               <div style={{
-                padding: "12px 14px", borderRadius: 10, background: colors.stone, border: `1px solid ${colors.stoneDark}`,
+                padding: "12px 14px", borderRadius: 10, 
+                background: "var(--bg-card, #22222B)", 
+                border: "1px solid var(--border-subtle, #2E2E3C)",
                 display: "flex", alignItems: "center", gap: 12
               }}>
                 <div style={{ fontSize: 24 }}>✨</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.ink }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
                     {t.contributorSanika}
                   </div>
-                  <div style={{ fontSize: 11, color: colors.inkMuted, marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted, #A1A1AF)", marginTop: 2 }}>
                     {t.contributorSanikaRole}
                   </div>
                 </div>
               </div>
 
               <div style={{
-                padding: "12px 14px", borderRadius: 10, background: colors.stone, border: `1px solid ${colors.stoneDark}`,
+                padding: "12px 14px", borderRadius: 10, 
+                background: "var(--bg-card, #22222B)", 
+                border: "1px solid var(--border-subtle, #2E2E3C)",
                 display: "flex", alignItems: "center", gap: 12
               }}>
                 <div style={{ fontSize: 24 }}>🚩</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.ink }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
                     {t.contributorSourav}
                   </div>
-                  <div style={{ fontSize: 11, color: colors.inkMuted, marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted, #A1A1AF)", marginTop: 2 }}>
                     {t.contributorSouravRole}
                   </div>
                 </div>
               </div>
 
               <div style={{
-                padding: "12px 14px", borderRadius: 10, background: colors.stone, border: `1px solid ${colors.stoneDark}`,
+                padding: "12px 14px", borderRadius: 10, 
+                background: "var(--bg-card, #22222B)", 
+                border: "1px solid var(--border-subtle, #2E2E3C)",
                 display: "flex", alignItems: "center", gap: 12
               }}>
                 <div style={{ fontSize: 24 }}>🗺️</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.ink }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>
                     {t.contributorOsm}
                   </div>
-                  <div style={{ fontSize: 11, color: colors.inkMuted, marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted, #A1A1AF)", marginTop: 2 }}>
                     {t.contributorOsmRole}
                   </div>
                 </div>
@@ -635,7 +772,8 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
                 rel="noreferrer"
                 style={{
                   flex: 1, textAlign: "center", textDecoration: "none",
-                  background: colors.wadaRed, color: "#fff", padding: "10px", borderRadius: 10,
+                  background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))", 
+                  color: "var(--cta-text, #0E0E10)", padding: "10px", borderRadius: 10,
                   fontSize: 12, fontWeight: 700, display: "inline-block"
                 }}
               >
@@ -644,8 +782,10 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
               <button
                 onClick={() => setIsContributorsModalOpen(false)}
                 style={{
-                  padding: "10px 18px", borderRadius: 10, border: `1px solid ${colors.stoneDark}`,
-                  background: colors.stone, color: colors.ink, fontSize: 12, fontWeight: 600, cursor: "pointer"
+                  padding: "10px 18px", borderRadius: 10, 
+                  border: "1px solid var(--border-subtle, #2E2E3C)",
+                  background: "var(--bg-card, #22222B)", 
+                  color: "var(--text-main, #F5F5F7)", fontSize: 12, fontWeight: 600, cursor: "pointer"
                 }}
               >
                 {t.close}
