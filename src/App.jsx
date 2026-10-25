@@ -114,9 +114,9 @@ function MainApp() {
         fontFamily: "var(--font-body, 'Inter', sans-serif)",
       }}
     >
-      {/* Universal Responsive Shell: 100% on iOS & Android, wide & expansive on Web */}
+      {/* Full-width edge-to-edge layout: NO black side gaps on Web, native 100% on iOS/Android */}
       <div 
-        className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto flex-1 flex flex-col relative h-[100dvh] sm:border-x sm:border-[var(--border-subtle,rgba(212,175,55,0.18))] sm:shadow-2xl overflow-hidden"
+        className="w-full flex-1 flex flex-col relative h-[100dvh] overflow-hidden"
         style={{
           background: "var(--bg-primary, #0E0E10)",
         }}

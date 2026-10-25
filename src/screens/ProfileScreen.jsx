@@ -308,6 +308,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
           position: "relative",
           overflow: "hidden",
         }}
+        className="w-full"
       >
         {/* Subtle decorative aura */}
         <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -327,7 +328,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
           />
         </div>
 
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+        <div className="max-w-4xl mx-auto relative z-10 text-center">
           {/* Profile Avatar Container with crisp Vedic Gold border */}
           <div
             style={{
@@ -374,7 +375,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
             fontSize: 13, 
             color: "rgba(255,255,255,0.85)", 
             marginTop: 4,
-            maxWidth: 300,
+            maxWidth: 320,
             marginInline: "auto",
             lineHeight: "18px"
           }}>
@@ -402,66 +403,68 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
       </div>
 
       {/* Stats & Rank Card */}
-      <div style={{ 
-        margin: "-22px 16px 20px", 
-        background: "var(--bg-card, #22222B)", 
-        borderRadius: 16, 
-        padding: "16px",
-        boxShadow: "var(--card-shadow, 0 8px 25px rgba(0,0,0,0.3))",
-        border: "1px solid var(--border-color, rgba(212,175,55,0.22))",
-        position: "relative",
-        zIndex: 2
-      }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, borderBottom: "1px solid var(--border-subtle, #2E2E3C)", paddingBottom: 16 }}>
-          {[
-            { label: t.saved, val: stats.savedCount, color: "var(--accent-primary, #FF9933)" },
-            { label: t.points, val: stats.totalPoints, color: "var(--accent-secondary, #D4AF37)" },
-            { label: t.stops, val: stats.completedStops, color: "#4EA8DE" },
-          ].map(stat => (
-            <div key={stat.label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: stat.color }}>{stat.val}</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", textTransform: "uppercase" }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,153,51,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🏆</div>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{t.communityRank}</div>
-              <div style={{ fontSize: 10, color: "var(--text-muted, #A1A1AF)" }}>
-                {userLanguage === "Marathi" ? `${stats.totalPoints} गुणांवर आधारित` : `Based on ${stats.totalPoints} points`}
+      <div className="w-full px-4 relative z-20" style={{ marginTop: -22, marginBottom: 20 }}>
+        <div 
+          className="max-w-4xl mx-auto p-4 rounded-2xl"
+          style={{ 
+            background: "var(--bg-card, #22222B)", 
+            boxShadow: "var(--card-shadow, 0 8px 25px rgba(0,0,0,0.3))",
+            border: "1px solid var(--border-color, rgba(212,175,55,0.22))",
+          }}
+        >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, borderBottom: "1px solid var(--border-subtle, #2E2E3C)", paddingBottom: 16 }}>
+            {[
+              { label: t.saved, val: stats.savedCount, color: "var(--accent-primary, #FF9933)" },
+              { label: t.points, val: stats.totalPoints, color: "var(--accent-secondary, #D4AF37)" },
+              { label: t.stops, val: stats.completedStops, color: "#4EA8DE" },
+            ].map(stat => (
+              <div key={stat.label} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: stat.color }}>{stat.val}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted, #A1A1AF)", textTransform: "uppercase" }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,153,51,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🏆</div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-main, #F5F5F7)" }}>{t.communityRank}</div>
+                <div style={{ fontSize: 10, color: "var(--text-muted, #A1A1AF)" }}>
+                  {userLanguage === "Marathi" ? `${stats.totalPoints} गुणांवर आधारित` : `Based on ${stats.totalPoints} points`}
+                </div>
               </div>
             </div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "var(--accent-primary, #FF9933)" }}>#{currentLevel.rank} {t.rankInPune}</div>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--accent-primary, #FF9933)" }}>#{currentLevel.rank} {t.rankInPune}</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 20, padding: "0 20px", borderBottom: "1px solid var(--border-subtle, #2E2E3C)", overflowX: "auto" }}>
-        {[
-          { id: "bookmarks", label: t.saved },
-          { id: "discoveries", label: t.discoveries },
-          { id: "activity", label: t.badges },
-        ].map(tab => (
-          <button 
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{ 
-              padding: "12px 4px", fontSize: 13, fontWeight: 700, border: "none", background: "none", cursor: "pointer",
-              color: activeSubTab === tab.id ? "var(--accent-primary, #FF9933)" : "var(--text-muted, #A1A1AF)",
-              borderBottom: activeSubTab === tab.id ? "3px solid var(--accent-primary, #FF9933)" : "3px solid transparent",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="w-full border-b border-[var(--border-subtle,#2E2E3C)]">
+        <div className="max-w-4xl mx-auto flex gap-5 px-4 overflow-x-auto">
+          {[
+            { id: "bookmarks", label: t.saved },
+            { id: "discoveries", label: t.discoveries },
+            { id: "activity", label: t.badges },
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ 
+                padding: "12px 4px", fontSize: 13, fontWeight: 700, border: "none", background: "none", cursor: "pointer",
+                color: activeSubTab === tab.id ? "var(--accent-primary, #FF9933)" : "var(--text-muted, #A1A1AF)",
+                borderBottom: activeSubTab === tab.id ? "3px solid var(--accent-primary, #FF9933)" : "3px solid transparent",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
-      <div style={{ background: "transparent", flex: 1, minHeight: 180 }}>
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 flex-1 min-h-[180px] pt-3">
         {activeSubTab === "bookmarks" && (
           <div>
             {savedPlaces.length === 0 ? (
@@ -546,7 +549,7 @@ export default function ProfileScreen({ onPlaceSelect, userLocation, userLanguag
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "24px 16px 40px", textAlign: "center", background: "transparent" }}>
+      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 text-center bg-transparent">
         {token ? (
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <button 

@@ -511,8 +511,9 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
           position: "relative",
           zIndex: 30,
         }}
+        className="w-full"
       >
-        <div style={{ position: "relative", zIndex: 10 }}>
+        <div className="max-w-4xl mx-auto relative z-10">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-heading)" }}>
               <span>{t.myPlan} 📜</span>
@@ -570,7 +571,14 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
     </div>
 
       {/* Day selector */}
-      <div style={{ background: "#8B3A2A", padding: "0 16px 16px", display: "flex", gap: 8, overflowX: "auto" }}>
+      <div 
+        style={{ 
+          background: "var(--hero-gradient, linear-gradient(135deg, #1C0F08 0%, #0E0E10 100%))", 
+          padding: "0 16px 16px" 
+        }} 
+        className="w-full"
+      >
+        <div className="max-w-4xl mx-auto flex gap-2 overflow-x-auto">
         {itineraryDays.map((d, i) => (
           <button
             key={d.id}
@@ -646,10 +654,23 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
             {optimizing ? "..." : (userLanguage === "Marathi" ? "मार्ग सुधारा" : "Optimize Route")} ⚡
           </button>
         )}
+        </div>
       </div>
 
       {/* Timeline */}
-      <div style={{ padding: "24px 20px", background: "#fff", borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -20, position: "relative", zIndex: 5 }}>
+      <div 
+        style={{ 
+          padding: "24px 20px", 
+          background: "#fff", 
+          borderTopLeftRadius: 30, 
+          borderTopRightRadius: 30, 
+          marginTop: -20, 
+          position: "relative", 
+          zIndex: 5 
+        }}
+        className="w-full"
+      >
+        <div className="max-w-4xl mx-auto">
         {weatherData?.weather === "Rainy" && hasOutdoorStops(day) && (
           <div
             style={{
@@ -815,30 +836,33 @@ export default function PlanScreen({ userLocation, userLanguage, weatherData, on
             </div>
           ))
         )}
+        </div>
       </div>
 
       {/* Add stop button */}
-      <div style={{ padding: "16px 16px 8px", background: "#fff" }}>
-        <button
-          onClick={() => setIsAddStopOpen(true)}
-          style={{
-            width: "100%",
-            background: "#FBF8F3",
-            color: "#8B3A2A",
-            border: "1.5px dashed #C46348",
-            borderRadius: 14,
-            padding: "12px",
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-          }}
-        >
-          + {t.addStop}
-        </button>
+      <div style={{ padding: "16px 16px 8px", background: "#fff" }} className="w-full">
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => setIsAddStopOpen(true)}
+            style={{
+              width: "100%",
+              background: "#FBF8F3",
+              color: "#8B3A2A",
+              border: "1.5px dashed #C46348",
+              borderRadius: 14,
+              padding: "12px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+            }}
+          >
+            + {t.addStop}
+          </button>
+        </div>
       </div>
 
       {/* 📊 ITINERARY OVERVIEW MODAL */}

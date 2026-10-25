@@ -24,7 +24,7 @@ export default function BottomNav({ activeTab, onTabChange, userLanguage }) {
         paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
       }}
     >
-      <div className="w-full max-w-xl mx-auto flex justify-around items-center px-2">
+      <div className="w-full max-w-4xl lg:max-w-5xl mx-auto flex justify-around items-center px-4 sm:px-8">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (

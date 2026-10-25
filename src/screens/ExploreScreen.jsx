@@ -91,7 +91,7 @@ export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userL
         <StatusBar />
         
         {/* Header Title & Switcher */}
-        <div style={{ padding: "10px 16px 12px" }}>
+        <div className="max-w-6xl mx-auto px-4 py-2.5">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
               {t.exploreTitle} 🔱
@@ -182,37 +182,39 @@ export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userL
         </div>
 
         {/* Filter chips */}
-        <div style={{ 
-          display: "flex", gap: 6, padding: "0 16px 12px", overflowX: "auto", 
-          background: "transparent", paddingBottom: 12
-        }}>
-          {categories.map((cat) => {
-            const isSelected = activeFilter === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => {
-                  setActiveFilter(cat);
-                  if (search) setSearch(""); // Reset search when explicitly picking category
-                }}
-                style={{
-                  padding: "5px 12px",
-                  borderRadius: 16,
-                  fontSize: 11,
-                  fontWeight: isSelected ? 700 : 500,
-                  flexShrink: 0,
-                  border: isSelected ? "1px solid var(--accent-primary, #FF9933)" : "1px solid var(--border-subtle, #333)",
-                  cursor: "pointer",
-                  background: isSelected ? "var(--accent-primary, #FF9933)" : "var(--bg-card, #22222B)",
-                  color: isSelected ? "var(--cta-text, #0E0E10)" : "var(--text-sub, #A1A1AF)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {userLanguage === "Marathi" ? (translations.Marathi[cat.toLowerCase()] || cat) : cat}
-              </button>
-            );
-          })}
+        <div className="max-w-6xl mx-auto px-4">
+          <div style={{ 
+            display: "flex", gap: 6, padding: "0 0 12px", overflowX: "auto", 
+            background: "transparent"
+          }}>
+            {categories.map((cat) => {
+              const isSelected = activeFilter === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter(cat);
+                    if (search) setSearch(""); // Reset search when explicitly picking category
+                  }}
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: 16,
+                    fontSize: 11,
+                    fontWeight: isSelected ? 700 : 500,
+                    flexShrink: 0,
+                    border: isSelected ? "1px solid var(--accent-primary, #FF9933)" : "1px solid var(--border-subtle, #333)",
+                    cursor: "pointer",
+                    background: isSelected ? "var(--accent-primary, #FF9933)" : "var(--bg-card, #22222B)",
+                    color: isSelected ? "var(--cta-text, #0E0E10)" : "var(--text-sub, #A1A1AF)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {userLanguage === "Marathi" ? (translations.Marathi[cat.toLowerCase()] || cat) : cat}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -222,25 +224,27 @@ export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userL
         onScroll={(e) => setShowScrollTop(e.target.scrollTop > 300)}
         style={{ flex: 1, overflowY: "auto", paddingBottom: 80, background: "var(--bg-primary, #0E0E10)" }}
       >
-        {loading ? (
-          <div style={{ padding: "40px 16px", textAlign: "center", color: "var(--accent-primary, #FF9933)", fontSize: 13, fontWeight: 600 }}>
-            🔍 {userLanguage === "Hindi" ? "स्थान खोज रहे हैं..." : "Searching sacred spots..."}
-          </div>
-        ) : filteredAndSortedPlaces.length === 0 ? (
-          <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-sub, #A1A1AF)", fontSize: 13 }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-            <div style={{ fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 4 }}>
-              {userLanguage === "Hindi" ? "कोई परिणाम नहीं मिला" : "No places found"}
+        <div className="max-w-6xl mx-auto w-full px-2 sm:px-4">
+          {loading ? (
+            <div style={{ padding: "40px 16px", textAlign: "center", color: "var(--accent-primary, #FF9933)", fontSize: 13, fontWeight: 600 }}>
+              🔍 {userLanguage === "Hindi" ? "स्थान खोज रहे हैं..." : "Searching sacred spots..."}
             </div>
-            <div>{t.noPlaces}</div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 p-2 sm:p-4">
-            {filteredAndSortedPlaces.map((place) => (
-              <PlaceListItem key={place.id || place.name} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
-            ))}
-          </div>
-        )}
+          ) : filteredAndSortedPlaces.length === 0 ? (
+            <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-sub, #A1A1AF)", fontSize: 13 }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
+              <div style={{ fontWeight: 700, color: "var(--text-main, #F5F5F7)", marginBottom: 4 }}>
+                {userLanguage === "Hindi" ? "कोई परिणाम नहीं मिला" : "No places found"}
+              </div>
+              <div>{t.noPlaces}</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 p-2 sm:p-4">
+              {filteredAndSortedPlaces.map((place) => (
+                <PlaceListItem key={place.id || place.name} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scroll to Top FAB */}
@@ -281,19 +285,18 @@ export default function ExploreScreen({ onPlaceSelect, initialParams = {}, userL
             backdropFilter: "blur(6px)",
             zIndex: 1000,
             display: "flex",
-            alignItems: "flex-end",
           }}
+          className="items-end sm:items-center justify-center p-0 sm:p-4"
         >
           <div
             style={{
               background: "var(--bg-surface, #18181D)",
               borderTop: "1.5px solid var(--border-color, rgba(212,175,55,0.3))",
               width: "100%",
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
               padding: 20,
               boxShadow: "0 -8px 30px rgba(0,0,0,0.5)",
             }}
+            className="sm:max-w-md sm:rounded-2xl sm:border sm:border-[var(--border-color,rgba(212,175,55,0.3))] rounded-t-3xl"
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>

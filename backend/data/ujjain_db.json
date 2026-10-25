@@ -17,6 +17,16 @@
       "xp": 150,
       "createdAt": "2026-10-22T16:29:01.516Z",
       "updatedAt": "2026-10-22T16:29:01.516Z"
+    },
+    {
+      "id": 3,
+      "name": "Vaibhav Thakur",
+      "phone": "8085029615",
+      "email": "vaibhav16052004@outlook.com",
+      "password": "$2b$10$SMB0H3RLAPTd5LezV7.mUeGDUgJgMzEr698jquGYNz.IakHPmy4Ki",
+      "xp": 150,
+      "createdAt": "2026-10-25T06:48:52.386Z",
+      "updatedAt": "2026-10-25T06:48:52.386Z"
     }
   ],
   "savedPlaces": [],
@@ -232,12 +242,136 @@
           "order": 2
         }
       ]
+    },
+    {
+      "id": 5,
+      "userId": 3,
+      "day": 1,
+      "label": "Day 1 · Mahakal & Shipra",
+      "stops": [
+        {
+          "id": 11,
+          "itineraryDayId": 5,
+          "time": "04:00 AM",
+          "name": "Shri Mahakaleshwar Jyotirlinga",
+          "name_mr": "श्री महाकालेश्वर ज्योतिर्लिंग",
+          "desc": "Witness the divine Bhasma Aarti of the south-facing Jyotirlinga.",
+          "desc_mr": "दक्षिणमुखी महाकाल ज्योतिर्लिंगाची दिव्य भस्म आरती आणि दर्शन.",
+          "dotColor": "#D9531E",
+          "tags": [
+            {
+              "label": "Temple",
+              "type": "temple"
+            }
+          ],
+          "done": false,
+          "order": 1
+        },
+        {
+          "id": 12,
+          "itineraryDayId": 5,
+          "time": "07:30 AM",
+          "name": "Ram Ghat (Shipra River)",
+          "name_mr": "राम घाट (शिप्रा नदी)",
+          "desc": "Take a sacred dip (Snan) in the holy Shipra waters and enjoy breakfast.",
+          "desc_mr": "पवित्र शिप्रा नदीत स्नान आणि ऐतिहासिक घाटांचे दर्शन.",
+          "dotColor": "#1B4965",
+          "tags": [
+            {
+              "label": "Nature",
+              "type": "nature"
+            }
+          ],
+          "done": false,
+          "order": 2
+        },
+        {
+          "id": 13,
+          "itineraryDayId": 5,
+          "time": "10:30 AM",
+          "name": "Harsiddhi Temple",
+          "name_mr": "हरसिद्धि माता मंदिर",
+          "desc": "Visit the 13th Shaktipeeth famous for its monumental deepstambhas.",
+          "desc_mr": "प्रसिद्ध ५१ शक्तिपीठांपैकी १३वे हरसिद्धि माता मंदिर.",
+          "dotColor": "#9E2A2B",
+          "tags": [
+            {
+              "label": "Heritage",
+              "type": "heritage"
+            }
+          ],
+          "done": false,
+          "order": 3
+        },
+        {
+          "id": 16,
+          "itineraryDayId": 5,
+          "time": "TBD",
+          "name": "Shri Mahakaleshwar Jyotirlinga",
+          "name_mr": "श्री महाकालेश्वर ज्योतिर्लिंग",
+          "desc": "One of the 12 sacred Jyotirlingas of Lord Shiva. The presiding deity is Dakshinmukhi (south-facing), unique among all Jyotirlingas. World-renowned for its mystical 4:00 AM Bhasma Aarti and the sprawling Mahakal Lok Corridor.",
+          "desc_mr": "भगवान शिव के १२ द्वादश ज्योतिर्लिंगों में से एक अत्यंत पावन धाम। यह एकमात्र दक्षिणमुखी ज्योतिर्लिंग है। यहाँ की प्रातःकालीन भस्म आरती और भव्य महाकाल लोक कॉरिडोर विश्वभर में प्रसिद्ध हैं।",
+          "dotColor": "#D9531E",
+          "tags": [
+            {
+              "label": "Temple",
+              "type": "temple"
+            }
+          ],
+          "done": false,
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "userId": 3,
+      "day": 2,
+      "label": "Day 2 · Heritage & Shrines",
+      "stops": [
+        {
+          "id": 14,
+          "itineraryDayId": 6,
+          "time": "09:00 AM",
+          "name": "Kal Bhairav Temple",
+          "name_mr": "काल भैरव मंदिर",
+          "desc": "Pay reverence to the fierce protector guardian of Avantika.",
+          "desc_mr": "उज्जैन नगरीचे रक्षक क्षेत्रपाल श्री काल भैरव दर्शन.",
+          "dotColor": "#B87318",
+          "tags": [
+            {
+              "label": "Temple",
+              "type": "temple"
+            }
+          ],
+          "done": false,
+          "order": 1
+        },
+        {
+          "id": 15,
+          "itineraryDayId": 6,
+          "time": "11:30 AM",
+          "name": "Vedh Shala (Jantar Mantar)",
+          "name_mr": "वेध शाला (जंतर मंतर)",
+          "desc": "Explore Raja Jai Singh's astronomical observatory on the prime meridian.",
+          "desc_mr": "१७१९ मधील राजा जयसिंह यांची प्राचीन खगोलशास्त्रीय वेधशाळा.",
+          "dotColor": "#2E6F40",
+          "tags": [
+            {
+              "label": "Heritage",
+              "type": "heritage"
+            }
+          ],
+          "done": false,
+          "order": 2
+        }
+      ]
     }
   ],
   "nextIds": {
-    "user": 3,
+    "user": 4,
     "savedPlace": 1,
-    "itineraryDay": 5,
-    "itineraryStop": 11
+    "itineraryDay": 7,
+    "itineraryStop": 17
   }
 }
