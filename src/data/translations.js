@@ -16,7 +16,7 @@ export const translations = {
     searchPlaceholder: "Search temples, ghats, food, events…",
     seeAll: "See all",
     popularSpots: "Sacred Spots",
-    nearbyEvents: "Ujjain Festivals",
+    nearbyEvents: "Upcoming Events & Celebrity Concerts",
     more: "More",
     showLess: "Show Less",
 
@@ -126,7 +126,7 @@ export const translations = {
     searchPlaceholder: "मंदिरे, घाट, खाद्यपदार्थ शोधा…",
     seeAll: "सर्व पहा",
     popularSpots: "पवित्र तीर्थस्थाने",
-    nearbyEvents: "उज्जैन उत्सव",
+    nearbyEvents: "आगामी कार्यक्रम व कॉन्सर्ट",
     more: "अधिक",
     showLess: "कमी पहा",
 
@@ -236,7 +236,7 @@ export const translations = {
     searchPlaceholder: "मंदिर, घाट, मालवी भोजन, उत्सव खोजें…",
     seeAll: "सभी देखें",
     popularSpots: "पवित्र तीर्थ स्थल",
-    nearbyEvents: "उज्जैन के उत्सव",
+    nearbyEvents: "आगामी कार्यक्रम व सेलिब्रिटी कॉन्सर्ट",
     more: "अधिक",
     showLess: "कम देखें",
 

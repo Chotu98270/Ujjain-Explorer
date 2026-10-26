@@ -293,6 +293,48 @@ const places = [
 
 const events = [
   {
+    date: "DEC 18, 2026",
+    name: "Arijit Singh Live Symphony - Ujjain",
+    desc: "Bollywood melody king Arijit Singh performing live in Ujjain with a 40-piece grand symphonic orchestra at Polytechnic Grounds.",
+    color: "indigo",
+  },
+  {
+    date: "NOV 22, 2026",
+    name: "Kailash Kher & Kailasa - Shivoham Live Tour",
+    desc: "Spiritual euphoria and Sufi-rock celebration dedicated to Lord Shiva and Baba Mahakal by Kailash Kher at Vikram Kirti Mandir Ground.",
+    color: "saffron",
+  },
+  {
+    date: "DEC 04, 2026",
+    name: "Hansraj Raghuwanshi (Babaji) - Jai Shri Mahakal Night",
+    desc: "Devotional sensation Hansraj Raghuwanshi singing live on Ram Ghat Shipra Riverfront with hits like Mera Bhola Hai Bhandari.",
+    color: "amber",
+  },
+  {
+    date: "JAN 10, 2027",
+    name: "Zakir Khan - Live Standup Special",
+    desc: "India's beloved comedian and storyteller Zakir Khan arrives in Ujjain at Vikram University Auditorium for an evening of laughter.",
+    color: "rose",
+  },
+  {
+    date: "JAN 24, 2027",
+    name: "B Praak - The Heartbreak & Symphony Arena Tour",
+    desc: "National Award-winning singer B Praak live with full orchestral arrangements at Government Engineering College Grounds.",
+    color: "terracotta",
+  },
+  {
+    date: "NOV 08, 2026",
+    name: "All India Kalidas Classical Sangeet Samaroh",
+    desc: "Sublime classical bansuri by Pt. Hariprasad Chaurasia and vocals by Kaushiki Chakraborty at Kalidas Sanskrit Academy.",
+    color: "cyan",
+  },
+  {
+    date: "FEB 14, 2027",
+    name: "Jubin Nautiyal - Live in Ujjain",
+    desc: "Heartfelt romantic and devotional concert featuring Lut Gaye and Shiva stuti at Kothi Palace Grounds.",
+    color: "indigo",
+  },
+  {
     date: "SHRAVAN SOMWAR",
     name: "Shri Mahakal Shahi Sawari",
     desc: "Grand royal palanquin procession of Baba Mahakal through old Ujjain",

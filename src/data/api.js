@@ -179,8 +179,9 @@ export const fetchPlaces = async (params = {}) => {
   return fallback;
 };
 
-export const fetchEvents = async () => {
-  const cacheKey = `${API_BASE_URL}/events`;
+export const fetchEvents = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  const cacheKey = `${API_BASE_URL}/events${query ? '?' + query : ''}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 

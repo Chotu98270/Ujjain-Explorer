@@ -555,34 +555,272 @@ export const itineraryDays = [
   },
 ];
 
-// ── UJJAIN CULTURAL EVENTS ──────────────────────────────────
-export const events = [
-  {
-    id: 1,
-    date: "SHRAVAN SOMWAR",
-    name: "Shri Mahakal Shahi Sawari",
-    desc: "Grand royal palanquin procession of Baba Mahakal through old Ujjain",
-    color: "saffron",
-  },
-  {
-    id: 2,
-    date: "MAHASHIVRATRI",
-    name: "Maha Shivratri Mahotsav",
-    desc: "44-hour continuous darshan and Deepotsav with millions of diyas",
-    color: "terracotta",
-  },
-  {
-    id: 3,
-    date: "KARTIK PURNIMA",
-    name: "Shipra Deepotsav & Kartik Mela",
-    desc: "Illumination of 5 lakh clay lamps across Ram Ghat and riverbanks",
-    color: "indigo",
-  },
-  {
-    id: 4,
-    date: "KUMBH MAHAPARVA",
-    name: "Simhastha Kumbh Snan",
-    desc: "Holy royal bath of 13 Akharas on the banks of sacred Shipra",
-    color: "amber",
-  },
+// ── UJJAIN DYNAMIC UPCOMING EVENTS & CELEBRITY CONCERTS ─────────
+const MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const FULL_MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
 ];
+
+function calculateDateMeta(baseDate, targetDate) {
+  const day = String(targetDate.getDate()).padStart(2, "0");
+  const month = MONTH_NAMES[targetDate.getMonth()];
+  const year = targetDate.getFullYear();
+  const fullMonth = FULL_MONTH_NAMES[targetDate.getMonth()];
+
+  const diffTime = targetDate.getTime() - baseDate.getTime();
+  const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+  let timeframe = 'upcoming';
+  if (targetDate.getMonth() === baseDate.getMonth() && targetDate.getFullYear() === baseDate.getFullYear()) {
+    timeframe = 'this_month';
+  } else if (
+    (targetDate.getMonth() === (baseDate.getMonth() + 1) % 12) &&
+    (targetDate.getFullYear() === baseDate.getFullYear() || (baseDate.getMonth() === 11 && targetDate.getFullYear() === baseDate.getFullYear() + 1))
+  ) {
+    timeframe = 'next_month';
+  }
+
+  let countdown = '';
+  if (daysLeft === 0) countdown = 'Today!';
+  else if (daysLeft === 1) countdown = 'Tomorrow';
+  else if (daysLeft <= 7) countdown = `In ${daysLeft} days`;
+  else if (timeframe === 'this_month') countdown = `This Month (${fullMonth})`;
+  else if (timeframe === 'next_month') countdown = `Next Month (${fullMonth})`;
+  else countdown = `Coming in ${fullMonth} ${year}`;
+
+  return {
+    date: `${month} ${day}, ${year}`,
+    daysLeft,
+    timeframe,
+    monthName: fullMonth,
+    year,
+    countdown
+  };
+}
+
+function getSeasonalDate(baseDate, targetMonth, targetDay) {
+  const year = baseDate.getFullYear();
+  let candidate = new Date(year, targetMonth, targetDay);
+  if (candidate.getTime() < baseDate.getTime()) {
+    candidate = new Date(year + 1, targetMonth, targetDay);
+  }
+  return candidate;
+}
+
+export const getDynamicUjjainEvents = (baseDate = new Date()) => {
+  const createRelativeEvent = (
+    id,
+    daysAhead,
+    name,
+    artist,
+    category,
+    badge,
+    venue,
+    time,
+    ticket,
+    desc,
+    color
+  ) => {
+    const targetDate = new Date(baseDate.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+    const meta = calculateDateMeta(baseDate, targetDate);
+    return {
+      id,
+      name,
+      artist,
+      category,
+      badge,
+      venue,
+      time,
+      ticket,
+      desc,
+      color,
+      ...meta
+    };
+  };
+
+  const createSeasonalEvent = (
+    id,
+    targetMonth,
+    targetDay,
+    name,
+    artist,
+    category,
+    badge,
+    venue,
+    time,
+    ticket,
+    desc,
+    color
+  ) => {
+    const targetDate = getSeasonalDate(baseDate, targetMonth, targetDay);
+    const meta = calculateDateMeta(baseDate, targetDate);
+    return {
+      id,
+      name,
+      artist,
+      category,
+      badge,
+      venue,
+      time,
+      ticket,
+      desc,
+      color,
+      ...meta
+    };
+  };
+
+  const eventList = [
+    createRelativeEvent(
+      1,
+      8,
+      "Hansraj Raghuwanshi (Babaji) - Jai Shri Mahakal Night",
+      "Hansraj Raghuwanshi",
+      "Celebrity Concert",
+      "⚡ LIVE BHAJAN ROCK",
+      "Shipra Riverfront Cultural Arena, Ram Ghat, Ujjain",
+      "07:30 PM Onwards",
+      "Open to All · Free Entry",
+      "Youth devotional sensation Hansraj Raghuwanshi singing live by the sacred Shipra River, featuring viral anthems 'Mera Bhola Hai Bhandari' and 'Shiv Kailash'.",
+      "amber"
+    ),
+    createRelativeEvent(
+      2,
+      14,
+      "All India Kalidas Classical Sangeet Samaroh",
+      "Pt. Hariprasad Chaurasia & Kaushiki Chakraborty",
+      "Classical Concert",
+      "🎻 CLASSICAL",
+      "Kalidas Sanskrit Academy, Kothi Road, Ujjain",
+      "06:00 PM Onwards",
+      "Free Cultural Invitation",
+      "Sublime jugalbandi of classical bansuri and Indian classical vocals in honor of Mahakavi Kalidas under the starry skies of Avantika.",
+      "cyan"
+    ),
+    createRelativeEvent(
+      3,
+      26,
+      "Kailash Kher & Kailasa - Shivoham Live Tour",
+      "Kailash Kher & Kailasa",
+      "Celebrity Concert",
+      "🕉️ SUFI ROCK",
+      "Vikram Kirti Mandir Open Amphitheatre, Ujjain",
+      "07:00 PM Onwards",
+      "Free Entry / VIP Passes Available",
+      "An electrifying night of spiritual euphoria and Sufi-rock celebration dedicated to Lord Shiva and Baba Mahakal by Kailash Kher and band.",
+      "saffron"
+    ),
+    createRelativeEvent(
+      4,
+      50,
+      "Arijit Singh Live Symphony - Ujjain",
+      "Arijit Singh",
+      "Celebrity Concert",
+      "🔥 MEGA CONCERT",
+      "Polytechnic Grounds, Dewas Road, Ujjain",
+      "06:30 PM Onwards",
+      "₹999 onwards · BookMyShow",
+      "Bollywood melody king Arijit Singh performing live in Ujjain with a 40-piece grand symphonic orchestra. Experience iconic hits, soulful melodies, and acoustic specials.",
+      "indigo"
+    ),
+    createRelativeEvent(
+      5,
+      72,
+      "Zakir Khan - Live Standup Special",
+      "Zakir Khan",
+      "Standup Comedy",
+      "🎤 COMEDY SPECIAL",
+      "Vikram University Golden Jubilee Auditorium, Ujjain",
+      "07:00 PM Onwards",
+      "₹499 onwards · BookMyShow",
+      "India's beloved comedian and storyteller Zakir Khan arrives in Ujjain for an evening of laughter, relatable tales, and heartwarming shayari.",
+      "rose"
+    ),
+    createRelativeEvent(
+      6,
+      90,
+      "B Praak - The Heartbreak & Symphony Arena Tour",
+      "B Praak",
+      "Celebrity Concert",
+      "🎵 LIVE SYMPHONY",
+      "Government Engineering College Grounds, Sanwer Road, Ujjain",
+      "06:30 PM Onwards",
+      "₹799 onwards · Insider.in",
+      "National Award-winning powerhouse B Praak live with high-energy orchestral arrangements of Teri Mitti, Filhaal, and Bollywood blockbusters.",
+      "terracotta"
+    ),
+    createRelativeEvent(
+      7,
+      112,
+      "Jubin Nautiyal - Live in Ujjain",
+      "Jubin Nautiyal",
+      "Celebrity Concert",
+      "⭐ CELEBRITY NIGHT",
+      "Kothi Palace Grounds, Ujjain",
+      "07:00 PM Onwards",
+      "₹899 onwards · BookMyShow",
+      "Heartfelt romantic and devotional concert featuring Lut Gaye, Raataan Lambiyan, and Shiva stuti in an unforgettable open-air concert.",
+      "indigo"
+    ),
+    createSeasonalEvent(
+      8,
+      10, // November
+      15,
+      "Shipra Deepotsav & Kartik Mela",
+      "Local Folk & Malwi Troupe",
+      "Festival",
+      "🪔 KARTIK MELA",
+      "Ram Ghat & Narsing Ghat, Ujjain",
+      "06:00 PM Onwards",
+      "Open Cultural Mela",
+      "Illumination of 5 lakh clay lamps across Ram Ghat accompanied by Malwi folk music, crafts, and festive street food.",
+      "indigo"
+    ),
+    createSeasonalEvent(
+      9,
+      1, // February
+      26,
+      "Maha Shivratri Mahotsav & Deepotsav",
+      "Temple Sangeet Yatris",
+      "Festival",
+      "✨ DEEPOTSAV",
+      "Mahakal Lok & Shipra Ghats, Ujjain",
+      "Continuous 44 Hours",
+      "Open to All Yatris",
+      "44-hour continuous darshan, mega Deepotsav with millions of earthen lamps lighting up the banks of sacred Shipra.",
+      "terracotta"
+    ),
+    createSeasonalEvent(
+      10,
+      6, // July
+      20,
+      "Shri Mahakal Shahi Sawari",
+      "Traditional Ujjain Nagada & Dhwaj Toli",
+      "Festival",
+      "🚩 MAHALPALKI",
+      "Mahakaleshwar Temple to Ram Ghat",
+      "04:00 PM Onwards",
+      "Public Pilgrimage",
+      "Grand royal palanquin procession of Baba Mahakal through old Ujjain with state police guard of honor and thousands of devotees.",
+      "saffron"
+    ),
+    createSeasonalEvent(
+      11,
+      3, // April
+      22,
+      "Simhastha Kumbh Snan",
+      "13 Sacred Akharas & Sadhus",
+      "Festival",
+      "🔱 SIMHASTHA",
+      "Shipra River All Ghats, Ujjain",
+      "Brahma Muhurat Onwards",
+      "Sacred Snan",
+      "Holy royal bath of 13 Akharas on the banks of sacred Shipra, the world's largest spiritual gathering in Avantika.",
+      "amber"
+    )
+  ];
+
+  return eventList.sort((a, b) => a.daysLeft - b.daysLeft);
+};
+
+export const events = getDynamicUjjainEvents();
