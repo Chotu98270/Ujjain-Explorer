@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceCard from "../components/PlaceCard";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import MahakalBookingModal from "../components/MahakalBookingModal";
 import { categories, places as fallbackPlaces, events as fallbackEvents, getDynamicUjjainEvents } from "../data/puneData";
 import { fetchPlaces, fetchEvents } from "../data/api";
 import { translations } from "../data/translations";
@@ -17,6 +18,13 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
   const [eventTimeframe, setEventTimeframe] = useState("all");
   const [simulatedTime, setSimulatedTime] = useState("live");
   const [bookingNotice, setBookingNotice] = useState(null);
+  const [isMahakalModalOpen, setIsMahakalModalOpen] = useState(false);
+  const [mahakalModalTab, setMahakalModalTab] = useState("bhasma");
+
+  const openMahakalMenu = (tab = "bhasma") => {
+    setMahakalModalTab(tab);
+    setIsMahakalModalOpen(true);
+  };
 
   const t = translations[userLanguage] || translations.English;
 
@@ -90,12 +98,35 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
         </div>
 
         <div className="max-w-6xl mx-auto px-1 sm:px-4 relative z-10">
-          {/* Top Bar with Greeting & Flagship Theme Switcher */}
+          {/* Top Bar with Greeting, Mahakal Menu Button & Flagship Theme Switcher */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", letterSpacing: 0.5, textTransform: "uppercase" }}>
               {t.greeting}
             </div>
-            <ThemeSwitcher variant="header" userLanguage={userLanguage} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                onClick={() => openMahakalMenu("bhasma")}
+                style={{
+                  background: "linear-gradient(135deg, rgba(255,153,51,0.25) 0%, rgba(212,175,55,0.2) 100%)",
+                  border: "1px solid var(--accent-primary, #FF9933)",
+                  color: "#FFFFFF",
+                  padding: "5px 12px",
+                  borderRadius: 20,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  boxShadow: "0 2px 10px rgba(255,153,51,0.25)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>🔱</span>
+                <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "महाकाल मेन्यू" : "Mahakal Menu"}</span>
+              </button>
+              <ThemeSwitcher variant="header" userLanguage={userLanguage} />
+            </div>
           </div>
 
           <div style={{ fontSize: 32, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.15, fontFamily: "var(--font-heading)" }}>
@@ -193,6 +224,166 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* 🔱 Shri Mahakal Darshan & Booking Menu */}
+      <div className="w-full px-4 sm:px-6 py-2">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header with Quick Actions */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 16, fontWeight: 800, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
+                <span>🔱</span>
+                <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "श्री महाकाल दर्शन एवं बुकिंग मेन्यू" : "Shri Mahakal Darshan & Booking Menu"}</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 2 }}>
+                {userLanguage === "Hindi"
+                  ? "भस्म आरती स्लॉट बुकिंग, ₹250 वीआईपी शीघ्र दर्शन, दैनिक ५ आरती एवं गर्भगृह नियम"
+                  : "Bhasma Aarti slot booking, ₹250 VIP Sheegra pass, 5 daily aartis & temple rules"}
+              </div>
+            </div>
+            <button
+              onClick={() => openMahakalMenu("passes")}
+              style={{
+                fontSize: 11,
+                color: "var(--accent-primary, #FF9933)",
+                background: "rgba(255,153,51,0.12)",
+                border: "1px solid rgba(255,153,51,0.25)",
+                borderRadius: 14,
+                padding: "4px 10px",
+                cursor: "pointer",
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+              }}
+            >
+              🎟️ {userLanguage === "Hindi" ? "मेरे पास" : "My Passes"}
+            </button>
+          </div>
+
+          {/* 4 Interactive Booking & Seva Action Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Card 1: Bhasma Aarti Booking */}
+            <div
+              onClick={() => openMahakalMenu("bhasma")}
+              className="rounded-2xl p-4 border border-[var(--border-color,rgba(212,175,55,0.25))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_12px_rgba(0,0,0,0.3))] cursor-pointer hover:border-[var(--accent-primary)] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              style={{
+                background: "linear-gradient(145deg, rgba(42, 20, 8, 0.45) 0%, var(--bg-card, #22222B) 100%)",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: "rgba(255,153,51,0.2)", color: "#FF9933" }}>
+                    🔴 04:00 AM RITUAL
+                  </span>
+                  <span style={{ fontSize: 18 }}>🕉️</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                  {userLanguage === "Hindi" ? "भस्म आरती बुकिंग" : "Bhasma Aarti Booking"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 4, lineHeight: 1.4 }}>
+                  {userLanguage === "Hindi"
+                    ? "प्रातः 4 बजे विश्वप्रसिद्ध दिव्य भस्म आरती दर्शन हेतु ऑनलाइन कोटा स्लॉट आरक्षित करें।"
+                    : "Advance online slot reservation for the world-famous 4 AM sacred cow-dung ash ritual."}
+                </div>
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 8, borderTop: "1px dashed rgba(212,175,55,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "#34D399", fontWeight: 700 }}>Free Token</span>
+                <span style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>Book Slot →</span>
+              </div>
+            </div>
+
+            {/* Card 2: VIP / Sheegra Darshan Booking */}
+            <div
+              onClick={() => openMahakalMenu("vip")}
+              className="rounded-2xl p-4 border border-[var(--border-color,rgba(212,175,55,0.25))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_12px_rgba(0,0,0,0.3))] cursor-pointer hover:border-[var(--accent-primary)] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              style={{
+                background: "linear-gradient(145deg, rgba(212, 175, 55, 0.15) 0%, var(--bg-card, #22222B) 100%)",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: "rgba(212,175,55,0.25)", color: "#D4AF37" }}>
+                    ⚡ FAST-TRACK GATE 4
+                  </span>
+                  <span style={{ fontSize: 18 }}>⚡</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                  {userLanguage === "Hindi" ? "VIP शीघ्र दर्शन (₹250)" : "VIP Sheegra Darshan (₹250)"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 4, lineHeight: 1.4 }}>
+                  {userLanguage === "Hindi"
+                    ? "गेट नंबर 4 से सीधी प्राथमिकता प्रवेश कतार। सामान्य कतार से बचकर सुगम दर्शन प्राप्त करें।"
+                    : "Priority express lane via Gate No. 4 (Bada Ganesh side). Skip general waiting queues."}
+                </div>
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 8, borderTop: "1px dashed rgba(212,175,55,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "#34D399", fontWeight: 700 }}>₹250 / Person</span>
+                <span style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>Book VIP →</span>
+              </div>
+            </div>
+
+            {/* Card 3: Daily Aarti Schedule */}
+            <div
+              onClick={() => openMahakalMenu("aarti")}
+              className="rounded-2xl p-4 border border-[var(--border-color,rgba(212,175,55,0.2))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_12px_rgba(0,0,0,0.3))] cursor-pointer hover:border-[var(--accent-primary)] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: "rgba(52, 211, 153, 0.15)", color: "#34D399" }}>
+                    ⏰ 5 DAILY AARTIS
+                  </span>
+                  <span style={{ fontSize: 18 }}>🪔</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                  {userLanguage === "Hindi" ? "दैनिक आरती समय" : "Daily Aarti Schedule"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 4, lineHeight: 1.4 }}>
+                  {userLanguage === "Hindi"
+                    ? "भस्म (4 AM), दद्योदक (7:30 AM), भोग (10:30 AM), संध्या (7 PM), शयन (10:30 PM)।"
+                    : "Complete timetable of 5 daily aartis, sanctum open hours and official live webcast."}
+                </div>
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 8, borderTop: "1px dashed rgba(212,175,55,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)" }}>Live Timings</span>
+                <span style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>View →</span>
+              </div>
+            </div>
+
+            {/* Card 4: Dress Code & Protocol */}
+            <div
+              onClick={() => openMahakalMenu("rules")}
+              className="rounded-2xl p-4 border border-[var(--border-color,rgba(212,175,55,0.2))] bg-[var(--bg-card,#22222B)] shadow-[var(--card-shadow,0_4px_12px_rgba(0,0,0,0.3))] cursor-pointer hover:border-[var(--accent-primary)] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 7px", borderRadius: 6, background: "rgba(244, 63, 94, 0.15)", color: "#FB7185" }}>
+                    👗 DRESS CODE & RULES
+                  </span>
+                  <span style={{ fontSize: 18 }}>📜</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                  {userLanguage === "Hindi" ? "नियम व वेशभूषा" : "Rules & Guidelines"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 4, lineHeight: 1.4 }}>
+                  {userLanguage === "Hindi"
+                    ? "गर्भगृह सोला/धोती नियम, डिजिटल फ्री लॉकर, व्हीलचेयर एवं महाकाल लोक सहायता।"
+                    : "Traditional unstitched Dhoti/Solah dress code, cloakrooms, senior battery carts."}
+                </div>
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 8, borderTop: "1px dashed rgba(212,175,55,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)" }}>Temple Protocol</span>
+                <span style={{ fontSize: 11, color: "var(--accent-primary, #FF9933)", fontWeight: 700 }}>Read →</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -645,6 +836,13 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
           </div>
         </div>
       )}
+      {/* 🔱 Shree Mahakal Darshan & Aarti Booking Modal */}
+      <MahakalBookingModal
+        isOpen={isMahakalModalOpen}
+        onClose={() => setIsMahakalModalOpen(false)}
+        initialTab={mahakalModalTab}
+        userLanguage={userLanguage}
+      />
     </div>
   );
 }

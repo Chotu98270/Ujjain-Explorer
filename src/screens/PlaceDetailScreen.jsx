@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StatusBar from "../components/StatusBar";
+import MahakalBookingModal from "../components/MahakalBookingModal";
 import { addStopToItinerary, toggleSavePlace, fetchItinerary } from "../data/api";
 import { calculateDistance, formatDistance } from "../utils/location";
 import { translations } from "../data/translations";
@@ -7,6 +8,13 @@ import { translations } from "../data/translations";
 export default function PlaceDetailScreen({ place, onBack, userLocation, userLanguage, onOpenAuth, user }) {
   const [isSaved, setIsSaved] = useState(place?.isSaved || false);
   const [selectedPhoto, setSelectedPhoto] = useState(place?.image || place?.photos?.[0] || null);
+  const [isMahakalModalOpen, setIsMahakalModalOpen] = useState(false);
+  const [mahakalModalTab, setMahakalModalTab] = useState("bhasma");
+
+  const openMahakalBooking = (tab = "bhasma") => {
+    setMahakalModalTab(tab);
+    setIsMahakalModalOpen(true);
+  };
 
   if (!place) return null;
 
@@ -301,6 +309,79 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
           ))}
         </div>
 
+        {/* 🔱 Shri Mahakal Booking & Seva Menu Box */}
+        {(place.id === 1 || place.name?.toLowerCase().includes("mahakal")) && (
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(42, 20, 8, 0.8) 0%, rgba(24, 24, 29, 0.95) 100%)",
+              border: "1.5px solid var(--accent-primary, #FF9933)",
+              borderRadius: 16,
+              padding: "16px",
+              marginBottom: 16,
+              boxShadow: "0 8px 24px rgba(255,153,51,0.2)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 800, color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                <span>🔱</span>
+                <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "महाकाल दर्शन एवं बुकिंग मेन्यू" : "Mahakal Booking & Seva Menu"}</span>
+              </div>
+              <span style={{ fontSize: 10, background: "rgba(255,153,51,0.2)", color: "var(--accent-primary, #FF9933)", padding: "2px 8px", borderRadius: 8, fontWeight: 700 }}>
+                Official Seva
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginBottom: 14, lineHeight: 1.4 }}>
+              {userLanguage === "Hindi"
+                ? "प्रातः 4:00 बजे भस्म आरती स्लॉट टोकन अथवा ₹250 वीआईपी शीघ्र दर्शन पास तुरंत बुक करें।"
+                : "Book official 4:00 AM Bhasma Aarti tokens or ₹250 VIP Sheegra Darshan fast-track passes."}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <button
+                onClick={() => openMahakalBooking("bhasma")}
+                style={{
+                  padding: "10px 8px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,153,51,0.4)",
+                  background: "rgba(255,153,51,0.15)",
+                  color: "#FFF",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                }}
+              >
+                <span>🕉️</span>
+                <span>Bhasma Aarti</span>
+              </button>
+
+              <button
+                onClick={() => openMahakalBooking("vip")}
+                style={{
+                  padding: "10px 8px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: "var(--cta-bg, linear-gradient(135deg, #FF9933 0%, #D4AF37 100%))",
+                  color: "#0E0E10",
+                  fontWeight: 800,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                }}
+              >
+                <span>⚡</span>
+                <span>VIP Pass (₹250)</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Darshan & Aarti Timings Card */}
         {place.darshanTimings && (
           <div
@@ -545,10 +626,19 @@ export default function PlaceDetailScreen({ place, onBack, userLocation, userLan
           )}
         </button>
       </div>
+
+      {/* 🔱 Shree Mahakal Darshan & Aarti Booking Modal */}
+      <MahakalBookingModal
+        isOpen={isMahakalModalOpen}
+        onClose={() => setIsMahakalModalOpen(false)}
+        initialTab={mahakalModalTab}
+        userLanguage={userLanguage}
+      />
     </div>
   );
 }
 
+// Helper info row
 function InfoRow({ icon, text }) {
   return (
     <div

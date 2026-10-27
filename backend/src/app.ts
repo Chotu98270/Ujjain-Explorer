@@ -10,6 +10,7 @@ import eventRoutes from './routes/eventRoutes';
 import itineraryRoutes from './routes/itineraryRoutes';
 import userRoutes from './routes/userRoutes';
 import weatherRoutes from './routes/weatherRoutes';
+import mahakalRoutes from './routes/mahakalRoutes';
 import { globalApiLimiter, authLimiter, aiGenerationLimiter } from './middleware/rateLimit';
 
 dotenv.config();
@@ -82,6 +83,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/itinerary', itineraryRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/mahakal', mahakalRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
