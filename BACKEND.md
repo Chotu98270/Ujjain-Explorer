@@ -202,3 +202,25 @@ model ItineraryStop {
 ## Redis Caching & Throttling
 - **Cache Invalidation**: On place updates, the backend invalidates cached JSON listings using standard wildcards (`places:*`).
 - **Discovery Throttling**: Background OSM fetches for queries/categories are throttled using a Redis cooldown key (e.g. `places:discovery:cooldown:cat:<category>`) set for **300 seconds (5 minutes)**. Subsequent requests during cooldown return cache hits, avoiding Overpass rate limits.
+
+---
+
+## 🚀 Production Deployment & Operations
+
+### Production Commands
+- **Generate Prisma Client**: `npx prisma generate`
+- **Compile TypeScript**: `npm run build`
+- **Deploy Migrations**: `npx prisma migrate deploy`
+- **Seed Production Data**: `npm run seed`
+- **Start Production Server**: `npm start` (`node dist/app.js`)
+
+### Production Environment Variables
+| Variable | Description |
+| :--- | :--- |
+| `NODE_ENV` | `production` |
+| `PORT` | Service port (default `3001`) |
+| `DATABASE_URL` | PostgreSQL connection string (PostGIS enabled) |
+| `JWT_SECRET` | Secret key for JWT signing |
+| `CLIENT_ORIGINS` | Comma-separated frontend origins for CORS |
+| `REDIS_URL` | Redis connection URL (optional; fallback to in-memory cache) |
+| `GEMINI_API_KEY` | Google Gemini API key (optional; fallback to algorithmic itinerary) |

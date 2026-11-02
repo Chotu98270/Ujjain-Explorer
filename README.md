@@ -147,6 +147,200 @@ npm run dev
 
 ---
 
+## 🚀 Production Deployment Guide
+
+Ujjain Explorer can be deployed using multiple flexible hosting architectures:
+
+1. **Decoupled Architecture (Recommended for Serverless & Cloud)**: Frontend on **Vercel / Netlify**, Backend on **Render / Railway**, Database on **Supabase / Neon**.
+2. **Unified Single-Server Architecture**: Node.js/Express serves both the compiled React frontend and the `/api` backend from a single instance on **Render, Railway, or VPS**.
+3. **Containerized Architecture**: Multi-container Docker deployment using `docker-compose.prod.yml`.
+4. **Self-Hosted Linux VPS**: Ubuntu with **Nginx Reverse Proxy + PM2 + Certbot SSL**.
+
+---
+
+### ⚙️ Production Environment Variables Checklist
+
+#### **Frontend Variables (Vercel / Netlify / Vite Build)**
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | Full URL to the deployed backend API | `https://api.ujjain-explorer.com/api` or `https://backend.onrender.com/api` |
+| `VITE_GOOGLE_MAPS_API_KEY` | *(Optional)* Google Maps API key for address geocoding | `AIzaSy...` |
+
+#### **Backend Variables (Render / Railway / VPS / Docker)**
+| Variable | Required | Description | Example |
+| :--- | :---: | :--- | :--- |
+| `NODE_ENV` | Yes | Set to `production` to activate static serving and security policies | `production` |
+| `PORT` | Yes | Port Express listens on (auto-assigned by Render/Railway) | `3001` or `8080` |
+| `DATABASE_URL` | Yes | PostgreSQL connection string (PostGIS extension enabled) | `postgresql://user:pass@host:5432/db?sslmode=require` |
+| `JWT_SECRET` | Yes | Strong random secret string for signing user auth tokens | `a_secure_random_64_char_string` |
+| `CLIENT_ORIGINS` | Yes | Comma-separated allowed frontend origins for CORS | `https://ujjain-explorer.vercel.app,https://mycustomdomain.com` |
+| `REDIS_URL` | No | Redis connection URL for caching (falls back to in-memory cache if omitted) | `redis://default:token@host:6379` |
+| `GEMINI_API_KEY` | No | Google Gemini API Key for dynamic AI itinerary synthesis | `AIzaSy...` |
+
+---
+
+### Method 1: Decoupled Cloud Deployment (Vercel + Render / Railway)
+
+#### **Step 1: Deploy Database (Supabase or Neon)**
+1. Create a free PostgreSQL database on [Supabase](https://supabase.com/) or [Neon](https://neon.tech/).
+2. Enable PostGIS extension in the SQL editor:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS postgis;
+   ```
+3. Copy the pooled or direct `DATABASE_URL` connection string.
+
+#### **Step 2: Deploy Backend (Render or Railway)**
+1. Log in to [Render](https://render.com/) or [Railway](https://railway.app/) and create a new **Web Service**.
+2. Connect your GitHub repository: `https://github.com/Chotu98270/Ujjain-Explorer`.
+3. Configure the build and run settings:
+   - **Root Directory:** `backend`
+   - **Environment:** `Node` (v20+)
+   - **Build Command:**
+     ```bash
+     npm install && npx prisma generate && npm run build
+     ```
+   - **Start Command:**
+     ```bash
+     npx prisma migrate deploy && npm start
+     ```
+4. In the **Environment Variables** tab, add:
+   - `NODE_ENV` = `production`
+   - `DATABASE_URL` = `<your_postgres_connection_string>`
+   - `JWT_SECRET` = `<your_strong_secret>`
+   - `CLIENT_ORIGINS` = `https://<your-vercel-frontend-domain>.vercel.app`
+   - `GEMINI_API_KEY` = `<your_gemini_api_key>` (optional)
+5. *(Optional initial data seed)* Run one-off seed in Render Shell / Railway CLI:
+   ```bash
+   npm run seed
+   ```
+6. Copy your deployed backend URL: `https://<backend-app-name>.onrender.com`.
+
+#### **Step 3: Deploy Frontend (Vercel)**
+1. Go to [Vercel](https://vercel.com/) and click **Add New Project**.
+2. Import `Chotu98270/Ujjain-Explorer`.
+3. Configure build settings:
+   - **Framework Preset:** `Vite`
+   - **Root Directory:** `./`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+4. In **Environment Variables**, add:
+   - `VITE_API_BASE_URL` = `https://<backend-app-name>.onrender.com/api`
+5. Click **Deploy**. Vercel will use the included [`vercel.json`](./vercel.json) for client-side SPA routing.
+
+---
+
+### Method 2: Unified Fullstack Single-Service Deployment
+
+You can deploy the complete fullstack application (Vite SPA + Express API) on a single Node service (e.g., Render Web Service, Railway, Fly.io, or Heroku). Express will serve the pre-built React frontend from `dist/` and handle all `/api/*` requests on the same port:
+
+1. Connect the repository root `./` to your cloud provider.
+2. Set configuration:
+   - **Build Command:**
+     ```bash
+     npm run build:all
+     ```
+     *(This runs backend dependencies installation, Prisma client generation, TypeScript compilation, and Vite React build)*
+   - **Start Command:**
+     ```bash
+     npm start
+     ```
+     *(This runs Prisma migrations and starts the production Express server)*
+3. Add environment variables:
+   - `NODE_ENV` = `production`
+   - `DATABASE_URL` = `<postgres_connection_string>`
+   - `JWT_SECRET` = `<your_secret>`
+
+---
+
+### Method 3: Dockerized Deployment (Single Command)
+
+A production-ready [`Dockerfile`](./Dockerfile) and [`docker-compose.prod.yml`](./docker-compose.prod.yml) are included. To launch the web app, PostgreSQL (with PostGIS), and Redis in production:
+
+```bash
+# Set your environment variables
+export JWT_SECRET="your_production_secret"
+export GEMINI_API_KEY="your_api_key"
+
+# Build and start all containers in detached mode
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+To run database migrations or seed data inside the container:
+```bash
+docker exec -it ujjain_explorer_app npx --prefix backend prisma migrate deploy
+docker exec -it ujjain_explorer_app npm --prefix backend run seed
+```
+
+---
+
+### Method 4: Self-Hosted Linux VPS (Ubuntu + Nginx + PM2)
+
+#### **1. Server Setup**
+```bash
+# Update server & install Node.js 20 & Nginx
+sudo apt update && sudo apt upgrade -y
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs nginx git
+sudo npm install -g pm2
+```
+
+#### **2. Clone & Build Application**
+```bash
+cd /var/www
+sudo git clone https://github.com/Chotu98270/Ujjain-Explorer.git
+cd Ujjain-Explorer
+sudo chown -R $USER:$USER .
+
+# Configure environment files (.env and backend/.env)
+cp .env.example .env
+cp backend/.env.example backend/.env
+# Edit credentials with: nano backend/.env
+
+# Build backend and frontend
+npm run build:all
+```
+
+#### **3. Start with PM2 Process Manager**
+```bash
+pm2 start "npm start" --name "ujjain-explorer"
+pm2 save
+pm2 startup
+```
+
+#### **4. Configure Nginx Reverse Proxy**
+Create `/etc/nginx/sites-available/ujjain-explorer`:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+Enable site and configure SSL:
+```bash
+sudo ln -s /etc/nginx/sites-available/ujjain-explorer /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+# Install free Let's Encrypt SSL certificate
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+---
+
 ## 🏛️ Project Structure
 
 ```
@@ -173,8 +367,11 @@ Ujjain-Explorer/
 │   ├── App.jsx             # Main React application router
 │   └── main.jsx            # React root mount
 ├── public/                 # Static assets, icons, and PWA manifest
-├── docker-compose.yml      # Multi-container Postgres + PostGIS + Redis setup
-├── package.json
+├── Dockerfile              # Multi-stage production Dockerfile
+├── docker-compose.yml      # Local Postgres + PostGIS + Redis setup
+├── docker-compose.prod.yml # Production multi-container fullstack setup
+├── package.json            # Root build orchestration scripts
+├── vercel.json             # Vercel SPA routing configuration
 └── vite.config.js
 ```
 
