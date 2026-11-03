@@ -127,7 +127,7 @@ export default function SettingsDrawer({
           style={{ background: "rgba(22, 22, 29, 0.95)" }}
         >
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">☰</span>
+            <span className="text-xl font-black text-[#FF9933]">⋮</span>
             <div>
               <h2 className="text-sm sm:text-base font-extrabold text-[#F5F5F7] tracking-tight">
                 {isHindi ? "सेटिंग्स एवं प्रोफाइल मेन्यू" : "Settings & Yatri Profile"}
