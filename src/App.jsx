@@ -7,6 +7,7 @@ import { useUserLocation } from "./hooks/useUserLocation";
 import { logoutUser, fetchWeather, toggleWeather } from "./data/api";
 
 const ExploreScreen = lazy(() => import("./screens/ExploreScreen"));
+const HotelsAndRestaurantsScreen = lazy(() => import("./screens/HotelsAndRestaurantsScreen"));
 const MapScreen = lazy(() => import("./screens/MapScreen"));
 const PlanScreen = lazy(() => import("./screens/PlanScreen"));
 const ProfileScreen = lazy(() => import("./screens/ProfileScreen"));
@@ -89,7 +90,19 @@ function MainApp() {
   const renderScreen = () => {
     switch (activeTab) {
       case "home":
-        return <HomeScreen onPlaceSelect={handlePlaceSelect} onSearchClick={handleSearchClick} userLocation={userLocation} userLanguage={userLanguage} weatherData={weatherData} onWeatherToggle={handleWeatherToggle} />;
+        return (
+          <HomeScreen 
+            onPlaceSelect={handlePlaceSelect} 
+            onSearchClick={handleSearchClick} 
+            onNavigateToStayDine={() => setActiveTab("stay-dine")}
+            userLocation={userLocation} 
+            userLanguage={userLanguage} 
+            weatherData={weatherData} 
+            onWeatherToggle={handleWeatherToggle} 
+          />
+        );
+      case "stay-dine":
+        return <HotelsAndRestaurantsScreen userLocation={userLocation} userLanguage={userLanguage} />;
       case "explore":
         return <ExploreScreen onPlaceSelect={handlePlaceSelect} initialParams={exploreParams} userLocation={userLocation} userLanguage={userLanguage} />;
       case "map":
@@ -101,7 +114,17 @@ function MainApp() {
       case "detail":
         return <PlaceDetailScreen place={selectedPlace} onBack={handleBack} userLocation={userLocation} userLanguage={userLanguage} onOpenAuth={handleOpenAuth} user={user} />;
       default:
-        return <HomeScreen onPlaceSelect={handlePlaceSelect} onSearchClick={handleSearchClick} userLocation={userLocation} userLanguage={userLanguage} weatherData={weatherData} onWeatherToggle={handleWeatherToggle} />;
+        return (
+          <HomeScreen 
+            onPlaceSelect={handlePlaceSelect} 
+            onSearchClick={handleSearchClick} 
+            onNavigateToStayDine={() => setActiveTab("stay-dine")}
+            userLocation={userLocation} 
+            userLanguage={userLanguage} 
+            weatherData={weatherData} 
+            onWeatherToggle={handleWeatherToggle} 
+          />
+        );
     }
   };
 

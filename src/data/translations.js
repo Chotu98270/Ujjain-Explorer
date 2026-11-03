@@ -3,6 +3,7 @@ export const translations = {
     // Nav
     home: "Home",
     explore: "Explore",
+    stayDine: "Hotels & Food",
     map: "Map",
     plan: "Plan",
     profile: "Profile",
@@ -113,6 +114,7 @@ export const translations = {
     // Nav
     home: "मुख्य",
     explore: "एक्सप्लोर",
+    stayDine: "हॉटेल व जेवण",
     map: "नकाशा",
     plan: "नियोजन",
     profile: "प्रोफाइल",
@@ -223,6 +225,7 @@ export const translations = {
     // Nav
     home: "मुख्य",
     explore: "खोजें",
+    stayDine: "होटल व भोजन",
     map: "मानचित्र",
     plan: "योजना",
     profile: "प्रोफ़ाइल",
@@ -333,6 +336,7 @@ export const translations = {
     // Nav
     home: "મુખ્ય",
     explore: "એક્સપ્લોર",
+    stayDine: "હોટેલ અને ભોજન",
     map: "નકશો",
     plan: "આયોજન",
     profile: "પ્રોફાઇલ",

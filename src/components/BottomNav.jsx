@@ -7,6 +7,7 @@ export default function BottomNav({ activeTab, onTabChange, userLanguage }) {
   const tabs = [
     { id: "home", icon: "🛕", label: t.home },
     { id: "explore", icon: "🔱", label: t.explore },
+    { id: "stay-dine", icon: "🏨", label: t.stayDine || "Stay & Dine" },
     { id: "map", icon: "🪔", label: t.map },
     { id: "plan", icon: "📜", label: t.plan },
     { id: "profile", icon: "🕉️", label: t.profile },
@@ -24,28 +25,28 @@ export default function BottomNav({ activeTab, onTabChange, userLanguage }) {
         paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
       }}
     >
-      <div className="w-full max-w-4xl lg:max-w-5xl mx-auto flex justify-around items-center px-4 sm:px-8">
+      <div className="w-full max-w-4xl lg:max-w-5xl mx-auto flex justify-around items-center px-2 sm:px-6">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="flex flex-col items-center gap-1 relative transition-all duration-200 py-1 px-2 sm:px-4"
+              className="flex flex-col items-center gap-1 relative transition-all duration-200 py-1 px-1 sm:px-3"
               style={{
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isActive ? 700 : 500,
                 color: isActive ? "var(--nav-active, #FF9933)" : "var(--nav-inactive, #8E8E9A)",
-                minWidth: 54,
+                minWidth: 46,
                 transform: isActive ? "translateY(-2px)" : "none",
               }}
             >
               <span
                 style={{
-                  fontSize: 22,
+                  fontSize: 20,
                   filter: isActive ? "drop-shadow(0 2px 6px rgba(255,153,51,0.5))" : "none",
                   transition: "filter 0.2s ease",
                 }}

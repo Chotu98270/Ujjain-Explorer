@@ -6,9 +6,11 @@ import MahakalBookingModal from "../components/MahakalBookingModal";
 import { categories, places as fallbackPlaces, events as fallbackEvents, getDynamicUjjainEvents } from "../data/puneData";
 import { fetchPlaces, fetchEvents } from "../data/api";
 import { translations } from "../data/translations";
+import { HOTELS_AND_RESTAURANTS } from "../data/hotelsAndRestaurantsData";
 
-export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation, userLanguage, weatherData, onWeatherToggle }) {
+export default function HomeScreen({ onPlaceSelect, onSearchClick, onNavigateToStayDine, userLocation, userLanguage, weatherData, onWeatherToggle }) {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [homeStayFilter, setHomeStayFilter] = useState("all");
   const [places, setPlaces] = useState(() => (fallbackPlaces || []).slice(0, 4));
   const [events, setEvents] = useState(() => fallbackEvents || []);
   const [loading, setLoading] = useState(false);
@@ -440,6 +442,163 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, userLocation,
             {places.map((place) => (
               <PlaceCard key={place.id} place={place} onClick={onPlaceSelect} userLocation={userLocation} userLanguage={userLanguage} />
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 🏨 Hotels & Restaurants Curated by Budget & Quality */}
+      <div className="w-full px-4 sm:px-6 py-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              marginBottom: 12,
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 16, fontWeight: 800, color: "var(--text-main, #F5F5F7)", fontFamily: "var(--font-heading)" }}>
+                <span>🏨</span>
+                <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "उज्जैन के शीर्ष होटल एवं प्रसिद्ध भोजनालय" : "Top Hotels & Restaurants in Ujjain"}</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-sub, #A1A1AF)", marginTop: 2 }}>
+                {userLanguage === "Hindi"
+                  ? "बजट व गुणवत्ता अनुसार: ₹650 तीर्थ धर्मशाला से 5-स्टार रिसॉर्ट्स, प्रसिद्ध दाल बाफला व सात्विक भोजन"
+                  : "Curated by budget & quality: ₹650 pilgrim stays to 5-star resorts, Dal Bafla & satvik thalis"}
+              </div>
+            </div>
+
+            <button
+              onClick={onNavigateToStayDine}
+              style={{
+                fontSize: 12,
+                color: "var(--accent-primary, #FF9933)",
+                cursor: "pointer",
+                fontWeight: 700,
+                background: "rgba(255,153,51,0.12)",
+                border: "1px solid rgba(255,153,51,0.25)",
+                borderRadius: 14,
+                padding: "4px 12px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {userLanguage === "Hindi" ? "सभी देखें (16+) →" : "View All (16+) →"}
+            </button>
+          </div>
+
+          {/* Quick Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scroll-touch">
+            {[
+              { id: "all", label: userLanguage === "Hindi" ? "🌟 शीर्ष चयन" : "🌟 Top Picks" },
+              { id: "budget", label: userLanguage === "Hindi" ? "💰 सस्ता व सुलभ (<₹1500)" : "💰 Budget Friendly" },
+              { id: "mid", label: userLanguage === "Hindi" ? "✨ मध्यम वर्ग" : "✨ Mid-Range" },
+              { id: "luxury", label: userLanguage === "Hindi" ? "👑 5-स्टार लक्ज़री" : "👑 5-Star Luxury" },
+              { id: "food", label: userLanguage === "Hindi" ? "🍽️ प्रसिद्ध मालवी भोजन" : "🍽️ Malwi Dining" },
+            ].map((f) => {
+              const isSelected = homeStayFilter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setHomeStayFilter(f.id)}
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: 16,
+                    fontSize: 11,
+                    fontWeight: isSelected ? 700 : 500,
+                    whiteSpace: "nowrap",
+                    border: isSelected ? "1px solid #FF9933" : "1px solid #2E2E3C",
+                    background: isSelected ? "#FF9933" : "#1A1A22",
+                    color: isSelected ? "#0E0E10" : "#A1A1AF",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Featured Cards Horizontal Scroller / Grid */}
+          <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto sm:overflow-x-visible pb-2 scroll-touch">
+            {HOTELS_AND_RESTAURANTS
+              .filter((item) => {
+                if (homeStayFilter === "budget") return item.budgetTier === "budget";
+                if (homeStayFilter === "mid") return item.budgetTier === "mid";
+                if (homeStayFilter === "luxury") return item.budgetTier === "luxury";
+                if (homeStayFilter === "food") return item.type === "restaurant";
+                return true;
+              })
+              .slice(0, 4)
+              .map((item) => {
+                const isHotel = item.type === "hotel";
+                return (
+                  <div
+                    key={item.id}
+                    onClick={onNavigateToStayDine}
+                    className="flex-shrink-0 w-64 sm:w-auto rounded-2xl border border-[#2A2A36] bg-[#16161D] overflow-hidden shadow-md hover:border-[#FF9933]/60 cursor-pointer transition-all flex flex-col justify-between"
+                  >
+                    <div className="relative h-32 w-full overflow-hidden bg-[#22222B]">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-black/20 to-black/30"></div>
+                      
+                      <div className="absolute top-2 left-2 flex items-center gap-1">
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                          item.budgetTier === "budget"
+                            ? "bg-[#10B981] text-white"
+                            : item.budgetTier === "mid"
+                            ? "bg-[#3B82F6] text-white"
+                            : "bg-[#D4AF37] text-[#0E0E10]"
+                        }`}>
+                          {item.budgetTier === "budget" ? "💰 Budget" : item.budgetTier === "mid" ? "✨ Mid-Range" : "👑 Luxury"}
+                        </span>
+                      </div>
+
+                      <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/70 border border-white/10 text-[10px] font-bold text-white">
+                        <span className="text-[#FF9933]">⭐</span>
+                        <span>{item.rating}</span>
+                      </div>
+
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <span className="text-[9px] font-bold text-[#FF9933] uppercase">
+                          {isHotel ? (userLanguage === "Hindi" ? "होटल" : "Hotel") : (userLanguage === "Hindi" ? "रेस्तरां" : "Restaurant")}
+                        </span>
+                        <div className="text-xs font-bold text-white truncate drop-shadow">
+                          {userLanguage === "Hindi" ? (item.name_hi || item.name) : item.name}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="text-[10px] text-[#34D399] font-medium flex items-center gap-1 mb-1">
+                          <span>🏆</span>
+                          <span className="truncate">{userLanguage === "Hindi" ? item.qualityBadge_hi : item.qualityBadge}</span>
+                        </div>
+                        <div className="text-[10px] text-[#A1A1AF] line-clamp-2 leading-relaxed mb-2">
+                          {userLanguage === "Hindi" ? item.highlight_hi : item.highlight}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#2A2A36] flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-[#34D399]">
+                          {item.priceDisplay}
+                        </span>
+                        <span className="text-[10px] font-bold text-[#FF9933]">
+                          {userLanguage === "Hindi" ? "बुक करें →" : "View →"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>
