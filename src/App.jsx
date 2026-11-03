@@ -1,6 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import HomeScreen from "./screens/HomeScreen";
 import BottomNav from "./components/BottomNav";
+import AppHeader from "./components/AppHeader";
+import SettingsDrawer from "./components/SettingsDrawer";
 import AuthScreen from "./screens/AuthScreen";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useUserLocation } from "./hooks/useUserLocation";
@@ -18,9 +20,10 @@ function MainApp() {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [exploreParams, setExploreParams] = useState({});
   const { location: userLocation } = useUserLocation();
-  const [userLanguage, setUserLanguage] = useState(() => localStorage.getItem("pune_user_lang") || "English");
+  const [userLanguage, setUserLanguage] = useState(() => localStorage.getItem("pune_user_lang") || "Hindi");
   const [weatherData, setWeatherData] = useState({ weather: "Sunny", temp: 32 });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("pune_auth_token");
@@ -95,6 +98,7 @@ function MainApp() {
             onPlaceSelect={handlePlaceSelect} 
             onSearchClick={handleSearchClick} 
             onNavigateToStayDine={() => setActiveTab("stay-dine")}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             userLocation={userLocation} 
             userLanguage={userLanguage} 
             weatherData={weatherData} 
@@ -119,6 +123,7 @@ function MainApp() {
             onPlaceSelect={handlePlaceSelect} 
             onSearchClick={handleSearchClick} 
             onNavigateToStayDine={() => setActiveTab("stay-dine")}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             userLocation={userLocation} 
             userLanguage={userLanguage} 
             weatherData={weatherData} 
@@ -144,6 +149,15 @@ function MainApp() {
           background: "var(--bg-primary, #0E0E10)",
         }}
       >
+        {/* Top App Bar with App Branding, Live Weather, Language Pill & Three-Line Menu (☰) */}
+        <AppHeader
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          userLanguage={userLanguage}
+          weatherData={weatherData}
+          onWeatherToggle={handleWeatherToggle}
+          onNavigateHome={() => setActiveTab("home")}
+        />
+
         {/* Screen Content Container with reliable flex-1, min-h-0 and iOS momentum scrolling */}
         <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden scroll-touch" style={{ background: "var(--bg-primary, #0E0E10)" }}>
           <Suspense fallback={
@@ -169,6 +183,21 @@ function MainApp() {
               </div>
             </div>
           )}
+
+          {/* ☰ / ⋮ Three-Line & Three-Dot Settings & Profile Drawer */}
+          <SettingsDrawer
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            userLanguage={userLanguage}
+            setUserLanguage={setUserLanguage}
+            user={user}
+            onOpenAuth={handleOpenAuth}
+            onLogout={handleLogout}
+            onNavigateToProfile={() => {
+              setIsSettingsOpen(false);
+              setActiveTab("profile");
+            }}
+          />
         </div>
 
         {/* Bottom nav — hidden on detail screen */}

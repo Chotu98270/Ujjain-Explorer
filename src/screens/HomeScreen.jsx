@@ -8,7 +8,7 @@ import { fetchPlaces, fetchEvents } from "../data/api";
 import { translations } from "../data/translations";
 import { HOTELS_AND_RESTAURANTS } from "../data/hotelsAndRestaurantsData";
 
-export default function HomeScreen({ onPlaceSelect, onSearchClick, onNavigateToStayDine, userLocation, userLanguage, weatherData, onWeatherToggle }) {
+export default function HomeScreen({ onPlaceSelect, onSearchClick, onNavigateToStayDine, onOpenSettings, userLocation, userLanguage, weatherData, onWeatherToggle }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [homeStayFilter, setHomeStayFilter] = useState("all");
   const [places, setPlaces] = useState(() => (fallbackPlaces || []).slice(0, 4));
@@ -128,6 +128,30 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, onNavigateToS
                 <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "महाकाल मेन्यू" : "Mahakal Menu"}</span>
               </button>
               <ThemeSwitcher variant="header" userLanguage={userLanguage} />
+              {onOpenSettings && (
+                <button
+                  onClick={onOpenSettings}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,153,51,0.2) 0%, rgba(212,175,55,0.15) 100%)",
+                    border: "1px solid var(--accent-primary, #FF9933)",
+                    color: "var(--accent-primary, #FF9933)",
+                    padding: "5px 11px",
+                    borderRadius: 20,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    boxShadow: "0 2px 8px rgba(255,153,51,0.2)",
+                    whiteSpace: "nowrap",
+                  }}
+                  title="Settings, Languages & Profile"
+                >
+                  <span style={{ fontSize: 14 }}>☰</span>
+                  <span style={{ fontSize: 10 }}>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "मेन्यू" : "Menu"}</span>
+                </button>
+              )}
             </div>
           </div>
 
