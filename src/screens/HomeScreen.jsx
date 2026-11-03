@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import StatusBar from "../components/StatusBar";
 import PlaceCard from "../components/PlaceCard";
-import ThemeSwitcher from "../components/ThemeSwitcher";
 import MahakalBookingModal from "../components/MahakalBookingModal";
 import { categories, places as fallbackPlaces, events as fallbackEvents, getDynamicUjjainEvents } from "../data/puneData";
 import { fetchPlaces, fetchEvents } from "../data/api";
@@ -100,59 +99,32 @@ export default function HomeScreen({ onPlaceSelect, onSearchClick, onNavigateToS
         </div>
 
         <div className="max-w-6xl mx-auto px-1 sm:px-4 relative z-10">
-          {/* Top Bar with Greeting, Mahakal Menu Button & Flagship Theme Switcher */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", letterSpacing: 0.5, textTransform: "uppercase" }}>
+          {/* Hero Sub-header with Sacred Greeting & Mahakal Quick Action */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent-primary, #FF9933)", letterSpacing: 0.5, textTransform: "uppercase" }}>
               {t.greeting}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button
-                onClick={() => openMahakalMenu("bhasma")}
-                style={{
-                  background: "linear-gradient(135deg, rgba(255,153,51,0.25) 0%, rgba(212,175,55,0.2) 100%)",
-                  border: "1px solid var(--accent-primary, #FF9933)",
-                  color: "#FFFFFF",
-                  padding: "5px 12px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  boxShadow: "0 2px 10px rgba(255,153,51,0.25)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span>🔱</span>
-                <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "महाकाल मेन्यू" : "Mahakal Menu"}</span>
-              </button>
-              <ThemeSwitcher variant="header" userLanguage={userLanguage} />
-              {onOpenSettings && (
-                <button
-                  onClick={onOpenSettings}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(255,153,51,0.2) 0%, rgba(212,175,55,0.15) 100%)",
-                    border: "1px solid var(--accent-primary, #FF9933)",
-                    color: "var(--accent-primary, #FF9933)",
-                    padding: "5px 11px",
-                    borderRadius: 20,
-                    fontSize: 12,
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    boxShadow: "0 2px 8px rgba(255,153,51,0.2)",
-                    whiteSpace: "nowrap",
-                  }}
-                  title="Settings, Languages & Profile"
-                >
-                  <span style={{ fontSize: 14 }}>☰</span>
-                  <span style={{ fontSize: 10 }}>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "मेन्यू" : "Menu"}</span>
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => openMahakalMenu("bhasma")}
+              style={{
+                background: "linear-gradient(135deg, rgba(255,153,51,0.25) 0%, rgba(212,175,55,0.2) 100%)",
+                border: "1px solid var(--accent-primary, #FF9933)",
+                color: "#FFFFFF",
+                padding: "5px 14px",
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 2px 10px rgba(255,153,51,0.25)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span>🔱</span>
+              <span>{userLanguage === "Hindi" || userLanguage === "Sanskrit" ? "महाकाल मेन्यू" : "Mahakal Menu"}</span>
+            </button>
           </div>
 
           <div style={{ fontSize: 32, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.15, fontFamily: "var(--font-heading)" }}>
